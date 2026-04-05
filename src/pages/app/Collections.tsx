@@ -12,13 +12,17 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
-import { Layers, Plus, ArrowLeft, Link2, ChevronRight } from 'lucide-react';
+import { Layers, Plus, ArrowLeft, Link2, ChevronRight, Trash2 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { formatBytes, formatDate } from '@/data/mockData';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 export default function Collections() {
-  const { collections, media, addCollection, addShareLink } = useApp();
+  const { collections, media, addCollection, addShareLink, deleteCollection } = useApp();
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -142,11 +146,37 @@ export default function Collections() {
                 <p className="text-sm text-muted-foreground">{selected.purpose}</p>
               </SheetHeader>
 
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">{selectedItems.length} files</Badge>
-                <Badge variant="outline">
-                  {formatBytes(selectedItems.reduce((a, m) => a + m.size, 0))} total
-                </Badge>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary">{selectedItems.length} files</Badge>
+                  <Badge variant="outline">
+                    {formatBytes(selectedItems.reduce((a, m) => a + m.size, 0))} total
+                  </Badge>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete "{selected.name}"?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove the collection. Files inside will be unassigned but not deleted.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => { deleteCollection(selected.id); setSelectedId(null); toast.success('Collection deleted'); }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               {selectedItems.length > 0 ? (

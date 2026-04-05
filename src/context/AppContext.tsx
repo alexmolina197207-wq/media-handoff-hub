@@ -20,6 +20,8 @@ interface AppState {
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;
   addCollection: (c: Collection) => void;
+  deleteFolder: (id: string) => void;
+  deleteCollection: (id: string) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -59,12 +61,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCollections(prev => [...prev, c]);
   };
 
+  const deleteFolder = (id: string) => {
+    setFolders(prev => prev.filter(f => f.id !== id));
+    setMedia(prev => prev.map(m => m.folderId === id ? { ...m, folderId: null } : m));
+  };
+
+  const deleteCollection = (id: string) => {
+    setCollections(prev => prev.filter(c => c.id !== id));
+    setMedia(prev => prev.map(m => m.collectionId === id ? { ...m, collectionId: null } : m));
+  };
+
   return (
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
       isAuthenticated, setAuthenticated, addMedia, addShareLink, upgradeUser,
-      addFolder, reorderFolders, addCollection,
+      addFolder, reorderFolders, addCollection, deleteFolder, deleteCollection,
     }}>
       {children}
     </AppContext.Provider>

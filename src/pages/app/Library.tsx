@@ -115,6 +115,24 @@ export default function Library() {
     });
   }, [media, search, typeFilter, folderFilter, collectionFilter, datePreset, dateFrom, dateTo, activeTags]);
 
+  const sorted = useMemo(() => {
+    const mul = sortDir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortField) {
+        case 'name': return mul * a.title.localeCompare(b.title);
+        case 'size': return mul * (a.size - b.size);
+        case 'type': return mul * a.type.localeCompare(b.type);
+        case 'date':
+        default: return mul * (new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime());
+      }
+    });
+  }, [filtered, sortField, sortDir]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir(field === 'name' ? 'asc' : 'desc'); }
+  };
+
   // Clean up stale selections
   useEffect(() => {
     setSelectedIds(prev => {

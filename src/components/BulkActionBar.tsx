@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
+import TagPresetManager from '@/components/TagPresetManager';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -107,7 +108,7 @@ export default function BulkActionBar({ selectedIds, onClear }: Props) {
                 <Tag className="h-4 w-4 mr-1" /> Tags
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-3" align="center" side="top">
+            <PopoverContent className="w-72 p-3 max-h-[420px] overflow-y-auto" align="center" side="top">
               <div className="flex gap-1 mb-3">
                 <Button
                   size="sm"
@@ -155,6 +156,10 @@ export default function BulkActionBar({ selectedIds, onClear }: Props) {
                       </div>
                     </div>
                   )}
+
+                  <div className="border-t border-border pt-2 mt-2">
+                    <TagPresetManager fileIds={ids} onApplied={onClear} />
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">

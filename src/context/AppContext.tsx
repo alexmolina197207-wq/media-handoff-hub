@@ -5,6 +5,12 @@ import {
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
 
+export interface TagPreset {
+  id: string;
+  name: string;
+  tags: string[];
+}
+
 interface AppState {
   user: User;
   media: MediaFile[];
@@ -34,6 +40,10 @@ interface AppState {
   twoFactorEnabled: boolean;
   twoFactorMethod: string | null;
   setTwoFactor: (enabled: boolean, method: string | null) => void;
+  tagPresets: TagPreset[];
+  addTagPreset: (preset: TagPreset) => void;
+  deleteTagPreset: (id: string) => void;
+  updateTagPreset: (id: string, updates: Partial<TagPreset>) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -179,6 +189,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMedia(prev => prev.map(m => m.collectionId === id ? { ...m, collectionId: null } : m));
   };
 
+  const defaultPresets: TagPreset[] = [
+    { id: 'preset-social', name: 'Social Media', tags: ['social', 'marketing', 'content'] },
+    { id: 'preset-client', name: 'Client Work', tags: ['client', 'deliverable', 'approved'] },
+    { id: 'preset-internal', name: 'Internal', tags: ['internal', 'draft', 'review'] },
+  ];
+
+  const [tagPresets, setTagPresets] = useState<TagPreset[]>(() => {
+    try {
+      const saved = localStorage.getItem('dr_tag_presets');
+      return saved ? JSON.parse(saved) : defaultPresets;
+    } catch { return defaultPresets; }
+  });
+
+  const persistPresets = (presets: TagPreset[]) => {
+    setTagPresets(presets);
+    try { localStorage.setItem('dr_tag_presets', JSON.stringify(presets)); } catch {}
+  };
+
+  const addTagPreset = (preset: TagPreset) => persistPresets([...tagPresets, preset]);
+  const deleteTagPreset = (id: string) => persistPresets(tagPresets.filter(p => p.id !== id));
+  const updateTagPreset = (id: string, updates: Partial<TagPreset>) =>
+    persistPresets(tagPresets.map(p => p.id === id ? { ...p, ...updates } : p));
+
   return (
     <AppContext.Provider value={{
       user, media, folders, collections,
@@ -186,6 +219,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
+      tagPresets, addTagPreset, deleteTagPreset, updateTagPreset,
     }}>
       {children}
     </AppContext.Provider>

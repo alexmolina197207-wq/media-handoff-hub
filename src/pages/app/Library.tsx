@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen } from 'lucide-react';
+import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen, GripVertical } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import MediaDetailSheet from '@/components/MediaDetailSheet';
 
 export default function Library() {
-  const { media, folders, addShareLink } = useApp();
+  const { media, folders, addShareLink, reorderMedia } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('tag') || '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [typeFilter, setTypeFilter] = useState<'all' | 'image' | 'video'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +29,42 @@ export default function Library() {
     }
   }, [searchParams, setSearchParams]);
 
+  const isFiltered = !!(search || typeFilter !== 'all');
+
   const filtered = media.filter(m => {
     const q = search.toLowerCase();
     const matchSearch = !q || m.title.toLowerCase().includes(q) || m.tags.some(t => t.includes(q));
     const matchType = typeFilter === 'all' || m.type === typeFilter;
     return matchSearch && matchType;
   });
+
+  const handleDragStart = (id: string) => {
+    if (isFiltered) return;
+    setDragId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (dragId && dragId !== id) setDragOverId(id);
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId || isFiltered) return;
+    const fromIdx = media.findIndex(m => m.id === dragId);
+    const toIdx = media.findIndex(m => m.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const reordered = [...media];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    reorderMedia(reordered);
+    setDragId(null);
+    setDragOverId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragId(null);
+    setDragOverId(null);
+  };
 
   const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();

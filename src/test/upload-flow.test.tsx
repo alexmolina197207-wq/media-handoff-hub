@@ -1,5 +1,4 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import UploadPage from '@/pages/app/UploadPage';
@@ -62,7 +61,6 @@ describe('upload bulk tag persistence', () => {
 
     useAppMock.mockImplementation(() => state);
 
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const uploadView = render(
       <MemoryRouter>
         <UploadPage />
@@ -77,16 +75,16 @@ describe('upload bulk tag persistence', () => {
     });
 
     const bulkInput = await screen.findByPlaceholderText('Add a tag…');
-    await user.type(bulkInput, 'marketing');
-    await user.keyboard('{Enter}');
-    await user.type(bulkInput, 'demo');
-    await user.keyboard('{Enter}');
+    fireEvent.change(bulkInput, { target: { value: 'marketing' } });
+    fireEvent.keyDown(bulkInput, { key: 'Enter', code: 'Enter' });
+    fireEvent.change(bulkInput, { target: { value: 'demo' } });
+    fireEvent.keyDown(bulkInput, { key: 'Enter', code: 'Enter' });
 
     const selects = screen.getAllByRole('combobox');
-    await user.click(selects[0]);
-    await user.click(screen.getByText('📨 Telegram'));
-    await user.click(selects[1]);
-    await user.click(screen.getByText('Q1 Campaign'));
+    fireEvent.click(selects[0]);
+    fireEvent.click(screen.getByText('📨 Telegram'));
+    fireEvent.click(selects[1]);
+    fireEvent.click(screen.getByText('Q1 Campaign'));
 
     fireEvent.change(fileInput, {
       target: {
@@ -128,7 +126,7 @@ describe('upload bulk tag persistence', () => {
       expect(within(card as HTMLElement).getByText('demo')).toBeInTheDocument();
     }
 
-    await user.click(screen.getByText('first.png'));
+    fireEvent.click(screen.getByText('first.png'));
 
     expect(await screen.findByText('#marketing')).toBeInTheDocument();
     expect(screen.getByText('#demo')).toBeInTheDocument();

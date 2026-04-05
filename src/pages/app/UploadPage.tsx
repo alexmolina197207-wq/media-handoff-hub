@@ -118,7 +118,7 @@ export default function UploadPage() {
         let previewUrl: string | undefined;
         if (ACCEPTED_TYPES[file.type] === "image") {
           previewUrl = URL.createObjectURL(file);
-          fileToDataUrl(file).then((dataUrl) => {
+          new Promise<string>((resolve) => { const r = new FileReader(); r.onload = () => resolve(r.result as string); r.readAsDataURL(file); }).then((dataUrl) => {
             setQueue((prevQueue) => prevQueue.map((q) => (q.id === id ? { ...q, previewUrl: dataUrl } : q)));
             if (previewUrl) URL.revokeObjectURL(previewUrl);
           });

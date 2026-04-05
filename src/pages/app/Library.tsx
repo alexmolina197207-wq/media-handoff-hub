@@ -120,10 +120,19 @@ export default function Library() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map(m => {
             const folder = folders.find(f => f.id === m.folderId);
+            const isDragging = dragId === m.id;
+            const isDragOver = dragOverId === m.id;
             return (
               <Card
                 key={m.id}
-                className="shadow-card border-border overflow-hidden group hover:shadow-elevated transition-shadow cursor-pointer active:scale-[0.98]"
+                draggable={!isFiltered}
+                onDragStart={() => handleDragStart(m.id)}
+                onDragOver={(e) => handleDragOver(e, m.id)}
+                onDrop={() => handleDrop(m.id)}
+                onDragEnd={handleDragEnd}
+                className={`shadow-card border-border overflow-hidden group hover:shadow-elevated transition-all cursor-pointer active:scale-[0.98] ${
+                  isDragging ? 'opacity-40 scale-95' : ''
+                } ${isDragOver ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                 onClick={() => setSelectedId(m.id)}
               >
                 <div className="relative aspect-video bg-muted">
@@ -132,6 +141,11 @@ export default function Library() {
                     {m.type === 'video' ? <Video className="h-3 w-3 mr-1" /> : <Image className="h-3 w-3 mr-1" />}
                     {m.type}
                   </Badge>
+                  {!isFiltered && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <GripVertical className="h-4 w-4 text-foreground/70 drop-shadow" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2">
                     <Button size="icon" variant="secondary" className="h-8 w-8" onClick={(e) => createShareLink(m.id, e)}>
                       <Link2 className="h-4 w-4" />

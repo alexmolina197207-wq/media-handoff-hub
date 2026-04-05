@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { formatBytes, formatDate } from '@/data/mockData';
 import {
   Search, Grid3X3, List, Image, Video, Link2, FolderOpen, GripVertical,
-  CheckSquare, SlidersHorizontal, X, CalendarDays, Tag,
+  CheckSquare, SlidersHorizontal, X, CalendarDays, Tag, ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -20,6 +20,8 @@ import BulkActionBar from '@/components/BulkActionBar';
 import { format } from 'date-fns';
 
 type DatePreset = 'all' | 'today' | 'week' | 'month' | 'custom';
+type SortField = 'date' | 'name' | 'size' | 'type';
+type SortDir = 'asc' | 'desc';
 
 export default function Library() {
   const { media, folders, collections, addShareLink, reorderMedia } = useApp();
@@ -34,6 +36,8 @@ export default function Library() {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -111,6 +115,24 @@ export default function Library() {
     });
   }, [media, search, typeFilter, folderFilter, collectionFilter, datePreset, dateFrom, dateTo, activeTags]);
 
+  const sorted = useMemo(() => {
+    const mul = sortDir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortField) {
+        case 'name': return mul * a.title.localeCompare(b.title);
+        case 'size': return mul * (a.size - b.size);
+        case 'type': return mul * a.type.localeCompare(b.type);
+        case 'date':
+        default: return mul * (new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime());
+      }
+    });
+  }, [filtered, sortField, sortDir]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir(field === 'name' ? 'asc' : 'desc'); }
+  };
+
   // Clean up stale selections
   useEffect(() => {
     setSelectedIds(prev => {
@@ -131,7 +153,7 @@ export default function Library() {
   };
 
   const selectAll = () => {
-    setSelectedIds(selectedIds.size === filtered.length ? new Set() : new Set(filtered.map(m => m.id)));
+    setSelectedIds(selectedIds.size === sorted.length ? new Set() : new Set(filtered.map(m => m.id)));
   };
 
   const clearSelection = () => { setSelectedIds(new Set()); setSelectMode(false); };
@@ -188,7 +210,7 @@ export default function Library() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Library</h1>
-          <p className="text-muted-foreground text-sm">{filtered.length} files</p>
+          <p className="text-muted-foreground text-sm">{sorted.length} files</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -244,6 +266,37 @@ export default function Library() {
           </Button>
         </div>
         <div className="flex items-center gap-1 ml-auto">
+          {/* Sort */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                {sortDir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline capitalize">{sortField}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-44 p-1.5" align="end">
+              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Sort by</p>
+              {([
+                ['date', 'Date uploaded'],
+                ['name', 'Name'],
+                ['size', 'File size'],
+                ['type', 'Type'],
+              ] as [SortField, string][]).map(([field, label]) => (
+                <button
+                  key={field}
+                  className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
+                    sortField === field ? 'bg-primary/10 text-primary font-medium' : 'text-foreground hover:bg-muted'
+                  }`}
+                  onClick={() => toggleSort(field)}
+                >
+                  {label}
+                  {sortField === field && (
+                    sortDir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
           <Button variant={view === 'grid' ? 'default' : 'ghost'} size="icon" onClick={() => setView('grid')}><Grid3X3 className="h-4 w-4" /></Button>
           <Button variant={view === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setView('list')}><List className="h-4 w-4" /></Button>
         </div>
@@ -253,11 +306,11 @@ export default function Library() {
       {selectMode && (
         <div className="flex items-center gap-3 p-2 rounded-lg border border-border bg-muted/50">
           <Checkbox
-            checked={filtered.length > 0 && selectedIds.size === filtered.length}
+            checked={sorted.length > 0 && selectedIds.size === sorted.length}
             onCheckedChange={selectAll}
           />
           <span className="text-sm text-foreground">
-            {selectedIds.size === filtered.length ? 'Deselect all' : 'Select all'}
+            {selectedIds.size === sorted.length ? 'Deselect all' : 'Select all'}
           </span>
           {selectedIds.size > 0 && (
             <Badge variant="secondary" className="ml-auto text-xs">{selectedIds.size} selected</Badge>
@@ -428,7 +481,7 @@ export default function Library() {
       {/* Grid view */}
       {view === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map(m => {
+          {sorted.map(m => {
             const folder = folders.find(f => f.id === m.folderId);
             const isDragging = dragId === m.id;
             const isDragOver = dragOverId === m.id;
@@ -509,7 +562,7 @@ export default function Library() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(m => {
+          {sorted.map(m => {
             const folder = folders.find(f => f.id === m.folderId);
             const isSelected = selectedIds.has(m.id);
             return (
@@ -549,7 +602,7 @@ export default function Library() {
       )}
 
       {/* Empty state */}
-      {filtered.length === 0 && (
+      {sorted.length === 0 && (
         <div className="text-center py-12">
           <Search className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-foreground font-medium">No files found</p>

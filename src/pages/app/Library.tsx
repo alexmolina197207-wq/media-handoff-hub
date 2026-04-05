@@ -36,6 +36,8 @@ export default function Library() {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);

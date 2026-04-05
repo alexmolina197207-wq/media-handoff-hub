@@ -577,19 +577,19 @@ function FileQueueItem({
           </div>
         </div>
 
-        {/* Per-file tag chips (always visible if tags exist) */}
-        {item.tags.length > 0 && !showTags && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {item.tags.map(tag => (
-              <Badge key={tag} variant="outline" className="text-[10px] gap-0.5 pr-1 h-5">
-                {tag}
-                {canEditTags && (
-                  <X className="h-2.5 w-2.5 cursor-pointer hover:text-destructive" onClick={() => onRemoveTag(tag)} />
-                )}
-              </Badge>
-            ))}
-          </div>
-        )}
+        {/* Per-file tag chips — always visible */}
+        <div className="flex flex-wrap gap-1 mt-2">
+          {item.tags.length > 0 ? item.tags.map(tag => (
+            <Badge key={tag} variant="outline" className="text-[10px] gap-0.5 pr-1 h-5">
+              {tag}
+              {canEditTags && (
+                <X className="h-2.5 w-2.5 cursor-pointer hover:text-destructive" onClick={() => onRemoveTag(tag)} />
+              )}
+            </Badge>
+          )) : (
+            <span className="text-[10px] text-muted-foreground italic">No tags</span>
+          )}
+        </div>
 
         {/* Expanded per-file tag editor */}
         {showTags && canEditTags && (

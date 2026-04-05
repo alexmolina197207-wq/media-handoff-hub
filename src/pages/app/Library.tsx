@@ -11,7 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { formatBytes, formatDate } from '@/data/mockData';
 import {
   Search, Grid3X3, List, Image, Video, Link2, FolderOpen, GripVertical,
-  CheckSquare, SlidersHorizontal, X, CalendarDays, Tag,
+  CheckSquare, SlidersHorizontal, X, CalendarDays, Tag, ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';

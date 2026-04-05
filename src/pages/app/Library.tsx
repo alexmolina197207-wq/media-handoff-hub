@@ -34,12 +34,12 @@ export default function Library() {
     return matchSearch && matchType;
   });
 
-  const selected = media.find(m => m.id === selectedId);
-  const selectedFolder = selected ? folders.find(f => f.id === selected.folderId) : undefined;
-  const selectedCollection = selected ? collections.find(c => c.id === selected.collectionId) : undefined;
-  const selectedLinks = selected ? shareLinks.filter(s => s.mediaId === selected.id) : [];
-
-  const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
+  const filtered = media.filter(m => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || m.title.toLowerCase().includes(q) || m.tags.some(t => t.includes(q));
+    const matchType = typeFilter === 'all' || m.type === typeFilter;
+    return matchSearch && matchType;
+  });
     e?.stopPropagation();
     const slug = `share-${Date.now().toString(36)}`;
     addShareLink({

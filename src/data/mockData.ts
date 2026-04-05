@@ -41,6 +41,12 @@ export interface ShareLink {
   access: 'public' | 'private' | 'password';
   clicks: number;
   active: boolean;
+  password?: string;
+  // Mock engagement data
+  uniqueVisitors?: number;
+  referrers?: { source: string; count: number }[];
+  devices?: { device: string; count: number }[];
+  clickHistory?: { date: string; clicks: number }[];
 }
 
 export interface StorageSummary {
@@ -63,7 +69,6 @@ export const demoUser: User = {
   plan: 'free',
 };
 
-const colors = ['3b82f6', '10b981', 'f59e0b', 'ef4444', '8b5cf6', '06b6d4', 'ec4899', '14b8a6'];
 const placeholderImg = (w: number, h: number, i: number) =>
   `https://images.unsplash.com/photo-${['1611162617213-7d7a39e9b1d7','1526374965328-7f61d4dc18c5','1574375927938-d5a98e8d6f2b','1551650975-87deedd944c6','1618556450994-a6a128ef0d9d','1535016120720-40c646be5580','1498050108023-c5249f4df085','1504805572947-34fad45aed93','1519389950473-47ba0277781c','1516321318423-f06f85e504b3','1611532736597-de2d4265fba3','1542831371-29b0f74f9713'][i % 12]}?w=${w}&h=${h}&fit=crop&auto=format`;
 
@@ -99,11 +104,36 @@ export const demoMedia: MediaFile[] = [
 ];
 
 export const demoShareLinks: ShareLink[] = [
-  { id: 's1', mediaId: 'm1', slug: 'hero-banner-q1', expiresAt: '2025-04-15T00:00:00Z', access: 'public', clicks: 47, active: true },
-  { id: 's2', mediaId: 'm2', slug: 'walkthrough-demo', expiresAt: '2025-04-10T00:00:00Z', access: 'public', clicks: 123, active: true },
-  { id: 's3', mediaId: 'm7', slug: 'acme-logo-drop', expiresAt: '2025-04-01T00:00:00Z', access: 'password', clicks: 8, active: false },
-  { id: 's4', mediaId: 'm8', slug: 'spring-promo-reel', expiresAt: '2025-05-01T00:00:00Z', access: 'public', clicks: 312, active: true },
-  { id: 's5', mediaId: 'm9', slug: 'tg-infographic', expiresAt: '2025-04-20T00:00:00Z', access: 'private', clicks: 15, active: true },
+  {
+    id: 's1', mediaId: 'm1', slug: 'hero-banner-q1', expiresAt: '2025-04-15T00:00:00Z', access: 'public', clicks: 47, active: true,
+    uniqueVisitors: 32, referrers: [{ source: 'Twitter', count: 22 }, { source: 'Direct', count: 15 }, { source: 'Slack', count: 10 }],
+    devices: [{ device: 'Desktop', count: 28 }, { device: 'Mobile', count: 14 }, { device: 'Tablet', count: 5 }],
+    clickHistory: [{ date: '2025-03-22', clicks: 5 }, { date: '2025-03-23', clicks: 8 }, { date: '2025-03-24', clicks: 12 }, { date: '2025-03-25', clicks: 6 }, { date: '2025-03-26', clicks: 9 }, { date: '2025-03-27', clicks: 4 }, { date: '2025-03-28', clicks: 3 }],
+  },
+  {
+    id: 's2', mediaId: 'm2', slug: 'walkthrough-demo', expiresAt: '2025-04-10T00:00:00Z', access: 'public', clicks: 123, active: true,
+    uniqueVisitors: 89, referrers: [{ source: 'LinkedIn', count: 45 }, { source: 'Email', count: 38 }, { source: 'Direct', count: 40 }],
+    devices: [{ device: 'Desktop', count: 72 }, { device: 'Mobile', count: 41 }, { device: 'Tablet', count: 10 }],
+    clickHistory: [{ date: '2025-03-22', clicks: 15 }, { date: '2025-03-23', clicks: 22 }, { date: '2025-03-24', clicks: 18 }, { date: '2025-03-25', clicks: 25 }, { date: '2025-03-26', clicks: 19 }, { date: '2025-03-27', clicks: 14 }, { date: '2025-03-28', clicks: 10 }],
+  },
+  {
+    id: 's3', mediaId: 'm7', slug: 'acme-logo-drop', expiresAt: '2025-04-01T00:00:00Z', access: 'password', clicks: 8, active: false, password: 'acme2025',
+    uniqueVisitors: 5, referrers: [{ source: 'Email', count: 6 }, { source: 'Direct', count: 2 }],
+    devices: [{ device: 'Desktop', count: 6 }, { device: 'Mobile', count: 2 }],
+    clickHistory: [{ date: '2025-03-25', clicks: 3 }, { date: '2025-03-26', clicks: 2 }, { date: '2025-03-27', clicks: 2 }, { date: '2025-03-28', clicks: 1 }],
+  },
+  {
+    id: 's4', mediaId: 'm8', slug: 'spring-promo-reel', expiresAt: '2025-05-01T00:00:00Z', access: 'public', clicks: 312, active: true,
+    uniqueVisitors: 198, referrers: [{ source: 'Instagram', count: 120 }, { source: 'Twitter', count: 95 }, { source: 'Direct', count: 97 }],
+    devices: [{ device: 'Mobile', count: 185 }, { device: 'Desktop', count: 102 }, { device: 'Tablet', count: 25 }],
+    clickHistory: [{ date: '2025-03-22', clicks: 35 }, { date: '2025-03-23', clicks: 52 }, { date: '2025-03-24', clicks: 48 }, { date: '2025-03-25', clicks: 61 }, { date: '2025-03-26', clicks: 44 }, { date: '2025-03-27', clicks: 38 }, { date: '2025-03-28', clicks: 34 }],
+  },
+  {
+    id: 's5', mediaId: 'm9', slug: 'tg-infographic', expiresAt: '2025-04-20T00:00:00Z', access: 'private', clicks: 15, active: true,
+    uniqueVisitors: 11, referrers: [{ source: 'Telegram', count: 12 }, { source: 'Direct', count: 3 }],
+    devices: [{ device: 'Mobile', count: 10 }, { device: 'Desktop', count: 5 }],
+    clickHistory: [{ date: '2025-03-25', clicks: 4 }, { date: '2025-03-26', clicks: 3 }, { date: '2025-03-27', clicks: 5 }, { date: '2025-03-28', clicks: 3 }],
+  },
 ];
 
 export const demoStorage: StorageSummary = {

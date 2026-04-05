@@ -26,6 +26,8 @@ interface AppState {
   deleteMedia: (id: string) => void;
   bulkDeleteMedia: (ids: string[]) => void;
   bulkMoveToFolder: (ids: string[], folderId: string | null) => void;
+  bulkAddTags: (ids: string[], tags: string[]) => void;
+  bulkRemoveTags: (ids: string[], tags: string[]) => void;
   deleteFolder: (id: string) => void;
   deleteCollection: (id: string) => void;
   twoFactorEnabled: boolean;
@@ -117,6 +119,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMedia(prev => prev.map(m => ids.includes(m.id) ? { ...m, folderId } : m));
   };
 
+  const bulkAddTags = (ids: string[], tags: string[]) => {
+    setMedia(prev => prev.map(m => ids.includes(m.id)
+      ? { ...m, tags: [...new Set([...m.tags, ...tags])] }
+      : m
+    ));
+  };
+
+  const bulkRemoveTags = (ids: string[], tags: string[]) => {
+    setMedia(prev => prev.map(m => ids.includes(m.id)
+      ? { ...m, tags: m.tags.filter(t => !tags.includes(t)) }
+      : m
+    ));
+  };
+
   const addShareLink = (s: ShareLink) => {
     setShareLinks(prev => [s, ...prev]);
     const file = media.find(m => m.id === s.mediaId);
@@ -162,7 +178,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
-      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, addShareLink, upgradeUser,
+      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
     }}>

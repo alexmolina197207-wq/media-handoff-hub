@@ -19,6 +19,7 @@ interface AppState {
   upgradeUser: () => void;
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;
+  addCollection: (c: Collection) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -28,6 +29,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(demoUser);
   const [media, setMedia] = useState<MediaFile[]>(demoMedia);
   const [folders, setFolders] = useState<Folder[]>(demoFolders);
+  const [collections, setCollections] = useState<Collection[]>(demoCollections);
   const [shareLinks, setShareLinks] = useState<ShareLink[]>(demoShareLinks);
   const [storage, setStorage] = useState<StorageSummary>(demoStorage);
 
@@ -53,12 +55,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFolders(newFolders);
   };
 
+  const addCollection = (c: Collection) => {
+    setCollections(prev => [...prev, c]);
+  };
+
   return (
     <AppContext.Provider value={{
-      user, media, folders, collections: demoCollections,
+      user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
       isAuthenticated, setAuthenticated, addMedia, addShareLink, upgradeUser,
-      addFolder, reorderFolders,
+      addFolder, reorderFolders, addCollection,
     }}>
       {children}
     </AppContext.Provider>

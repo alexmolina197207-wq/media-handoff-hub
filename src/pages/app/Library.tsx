@@ -1,23 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Search, Grid3X3, List, Image, Video, MoreHorizontal, Link2, FolderOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export default function Library() {
   const { media, folders, addShareLink } = useApp();
-  const [search, setSearch] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('tag') || '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [typeFilter, setTypeFilter] = useState<'all' | 'image' | 'video'>('all');
   const navigate = useNavigate();
 
+  // Sync tag param to search
+  useEffect(() => {
+    const tag = searchParams.get('tag');
+    if (tag) {
+      setSearch(tag);
+      // Clear the param so it doesn't stick on manual search changes
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const filtered = media.filter(m => {
-    const matchSearch = m.title.toLowerCase().includes(search.toLowerCase()) || m.tags.some(t => t.includes(search.toLowerCase()));
+    const q = search.toLowerCase();
+    const matchSearch = !q || m.title.toLowerCase().includes(q) || m.tags.some(t => t.includes(q));
     const matchType = typeFilter === 'all' || m.type === typeFilter;
     return matchSearch && matchType;
   });
@@ -62,6 +74,15 @@ export default function Library() {
         </div>
       </div>
 
+      {search && (
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1">
+            Filtering: "{search}"
+            <button onClick={() => setSearch('')} className="ml-1 hover:text-destructive text-xs">✕</button>
+          </Badge>
+        </div>
+      )}
+
       {view === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map(m => {
@@ -89,7 +110,14 @@ export default function Library() {
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {m.tags.slice(0, 2).map(t => (
-                      <Badge key={t} variant="outline" className="text-[10px] px-1.5 py-0">{t}</Badge>
+                      <Badge
+                        key={t}
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 cursor-pointer hover:bg-primary/10 active:scale-95 transition-all"
+                        onClick={() => setSearch(t)}
+                      >
+                        {t}
+                      </Badge>
                     ))}
                     {folder && (
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
@@ -107,7 +135,7 @@ export default function Library() {
           {filtered.map(m => {
             const folder = folders.find(f => f.id === m.folderId);
             return (
-              <div key={m.id} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors">
+              <div key={m.id} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-card hover:bg-muted/50 active:bg-muted transition-colors">
                 <img src={m.previewUrl} alt={m.title} className="w-12 h-12 rounded-md object-cover" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{m.title}</p>

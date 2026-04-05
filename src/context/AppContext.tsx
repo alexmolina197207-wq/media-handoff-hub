@@ -3,6 +3,7 @@ import {
   MediaFile, Folder, Collection, ShareLink, StorageSummary, ActivitySummary, User,
   demoUser, demoMedia, demoFolders, demoCollections, demoShareLinks, demoStorage, demoActivity,
 } from '@/data/mockData';
+import { useNotifications } from '@/context/NotificationContext';
 
 interface AppState {
   user: User;
@@ -35,6 +36,7 @@ interface AppState {
 const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const { addNotification } = useNotifications();
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState<User>(demoUser);
   const [media, setMedia] = useState<MediaFile[]>(demoMedia);
@@ -66,6 +68,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);
     setStorage(prev => ({ ...prev, fileCount: prev.fileCount + 1, used: prev.used + m.size, recentUploads: prev.recentUploads + 1 }));
+    addNotification({
+      type: 'upload',
+      title: 'Upload complete',
+      message: `"${m.name}" (${(m.size / 1_000_000).toFixed(1)} MB) was uploaded successfully.`,
+    });
   };
 
   const updateMedia = (id: string, updates: Partial<MediaFile>) => {
@@ -95,6 +102,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addShareLink = (s: ShareLink) => {
     setShareLinks(prev => [s, ...prev]);
+    const file = media.find(m => m.id === s.mediaId);
+    addNotification({
+      type: 'share',
+      title: 'Share link created',
+      message: `A new share link was created for "${file?.name || 'a file'}"${s.expiresAt ? ` expiring ${new Date(s.expiresAt).toLocaleDateString()}` : ''}.`,
+    });
   };
 
   const upgradeUser = () => {

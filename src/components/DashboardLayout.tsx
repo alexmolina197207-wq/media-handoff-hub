@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
@@ -8,7 +9,7 @@ import {
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, Image, Upload, FolderOpen, Link2, Layers, HardDrive, BarChart3, Settings, LogOut,
+  LayoutDashboard, Image, Upload, FolderOpen, Link2, Layers, HardDrive, BarChart3, Settings, LogOut, Sun, Moon,
 } from 'lucide-react';
 
 const navItems = [
@@ -76,6 +77,15 @@ function AppSidebar() {
   );
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+      {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+    </Button>
+  );
+}
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
@@ -85,6 +95,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center border-b border-border px-4 bg-card">
             <SidebarTrigger className="mr-4" />
             <h2 className="font-semibold text-foreground text-sm">DropRelay Dashboard</h2>
+            <div className="ml-auto">
+              <ThemeToggle />
+            </div>
           </header>
           <main className="flex-1 p-4 md:p-6 overflow-auto">
             {children}

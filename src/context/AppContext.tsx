@@ -42,6 +42,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<Collection[]>(demoCollections);
   const [shareLinks, setShareLinks] = useState<ShareLink[]>(demoShareLinks);
   const [storage, setStorage] = useState<StorageSummary>(demoStorage);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
+
+  const setTwoFactor = (enabled: boolean, method: string | null) => {
+    setTwoFactorEnabled(enabled);
+    setTwoFactorMethod(method);
+  };
 
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);

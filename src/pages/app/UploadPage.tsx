@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import {
   Upload, Image, Video, X, RotateCcw, AlertTriangle, CheckCircle2,
-  FileWarning, Trash2, Ban, FolderOpen, Layers,
+  FileWarning, Trash2, Ban, FolderOpen, Layers, Tag, Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { formatBytes } from '@/data/mockData';
 
@@ -41,7 +42,7 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, folders, collections, addMedia } = useApp();
+  const { media, folders, collections, addMedia, tagPresets } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,6 +51,8 @@ export default function UploadPage() {
   const [selectedCollection, setSelectedCollection] = useState<string>('none');
   const abortRefs = useRef<Map<string, () => void>>(new Map());
   const dragCounter = useRef(0);
+  const [uploadTags, setUploadTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   // --- Validation ---
   const validateFile = useCallback((file: File): { ok: boolean; error?: string } => {
@@ -138,7 +141,7 @@ export default function UploadPage() {
             id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             title: q.name,
             type: q.mediaType,
-            tags: [],
+            tags: [...uploadTags],
             size: q.size,
             folderId: selectedFolder !== 'none' ? selectedFolder : null,
             collectionId: selectedCollection !== 'none' ? selectedCollection : null,

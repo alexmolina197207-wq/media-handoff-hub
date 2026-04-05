@@ -41,11 +41,13 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, addMedia } = useApp();
+  const { media, folders, collections, addMedia } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string>('none');
+  const [selectedCollection, setSelectedCollection] = useState<string>('none');
   const abortRefs = useRef<Map<string, () => void>>(new Map());
   const dragCounter = useRef(0);
 

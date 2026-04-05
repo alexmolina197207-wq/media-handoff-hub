@@ -37,7 +37,17 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { addNotification } = useNotifications();
-  const [isAuthenticated, setAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const setAuthenticated = (v: boolean) => {
+    setIsAuthenticated(v);
+    if (v) {
+      addNotification({
+        type: 'security',
+        title: 'New sign-in detected',
+        message: 'You signed in from this device just now.',
+      });
+    }
+  };
   const [user, setUser] = useState<User>(demoUser);
   const [media, setMedia] = useState<MediaFile[]>(demoMedia);
   const [folders, setFolders] = useState<Folder[]>(demoFolders);

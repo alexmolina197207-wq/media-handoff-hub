@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,13 +9,27 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { AlertTriangle, Moon, Sun } from 'lucide-react';
+import { AlertTriangle, Moon, Sun, Trash2 } from 'lucide-react';
 import SecuritySettings from '@/components/SecuritySettings';
 
 export default function AppSettings() {
-  const { user, upgradeUser } = useApp();
+  const { user, upgradeUser, setAuthenticated } = useApp();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [deleteStep, setDeleteStep] = useState<'closed' | 'warning' | 'confirm'>('closed');
+  const [confirmText, setConfirmText] = useState('');
+
+  const handleDeleteAccount = () => {
+    setAuthenticated(false);
+    setDeleteStep('closed');
+    toast.success('Account scheduled for deletion. You have 30 days to cancel.');
+    navigate('/');
+  };
 
   return (
     <div className="max-w-2xl space-y-6 animate-fade-in">
@@ -80,6 +96,30 @@ export default function AppSettings() {
         </CardContent>
       </Card>
 
+      {/* Delete Account */}
+      <Card className="shadow-card border-destructive/30 border">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2 text-destructive">
+            <Trash2 className="h-4 w-4" />
+            Delete Account
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Permanently delete your account and all associated data, including files, folders, collections, and shared links. This action cannot be undone after 30 days.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => setDeleteStep('warning')}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete My Account
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-card border-border bg-muted/30">
         <CardContent className="p-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
@@ -89,6 +129,72 @@ export default function AppSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Step 1: Warning */}
+      <AlertDialog open={deleteStep === 'warning'} onOpenChange={v => !v && setDeleteStep('closed')}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Are you sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <span className="block">Deleting your account will permanently remove:</span>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>All uploaded files and media</li>
+                <li>Folders, collections, and tags</li>
+                <li>Shared links and access permissions</li>
+                <li>Account settings and preferences</li>
+              </ul>
+              <span className="block font-medium text-foreground">
+                You have 30 days to cancel the deletion before it becomes permanent.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { setDeleteStep('confirm'); setConfirmText(''); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Step 2: Type to confirm */}
+      <AlertDialog open={deleteStep === 'confirm'} onOpenChange={v => !v && setDeleteStep('closed')}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Confirm Account Deletion</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p>
+                  To confirm, type <strong className="text-foreground font-mono">delete my account</strong> below.
+                </p>
+                <Input
+                  value={confirmText}
+                  onChange={e => setConfirmText(e.target.value)}
+                  placeholder="delete my account"
+                  className="font-mono"
+                  autoFocus
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteStep('closed')}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={confirmText.toLowerCase() !== 'delete my account'}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+            >
+              Permanently Delete Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

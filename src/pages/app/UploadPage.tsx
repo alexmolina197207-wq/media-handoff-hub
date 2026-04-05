@@ -56,6 +56,7 @@ export default function UploadPage() {
 
   // Bulk tag state — these are "pending" tags the user builds, applied explicitly
   const [bulkTags, setBulkTags] = useState<string[]>([]);
+  const prevBulkTagsRef = useRef<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [applyToAll, setApplyToAll] = useState(true);
 

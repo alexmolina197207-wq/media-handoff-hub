@@ -73,7 +73,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
 
   const handleDownloadCodes = () => {
     const blob = new Blob([
-      'DropRelay - Two-Factor Authentication Backup Codes\n',
+      'AnyRelay - Two-Factor Authentication Backup Codes\n',
       '================================================\n\n',
       'Keep these codes in a safe place. Each code can only be used once.\n\n',
       ...MOCK_BACKUP_CODES.map((c, i) => `${i + 1}. ${c}\n`),
@@ -81,7 +81,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'droprelay-backup-codes.txt';
+    a.download = 'anyrelay-backup-codes.txt';
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Backup codes downloaded');
@@ -229,7 +229,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
             <div className="space-y-4 py-2">
               <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <p className="text-xs text-muted-foreground">
-                  {selectedMethod === 'email' ? 'Code sent to alex@droprelay.demo' : 'Code sent to •••••••1234'}
+                  {selectedMethod === 'email' ? 'Code sent to alex@anyrelay.demo' : 'Code sent to •••••••1234'}
                 </p>
               </div>
               <div className="space-y-2">

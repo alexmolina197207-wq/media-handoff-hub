@@ -14,7 +14,7 @@ import LoginTwoFactor from '@/components/LoginTwoFactor';
 
 export default function Login() {
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState('alex@droprelay.demo');
+  const [email, setEmail] = useState('alex@anyrelay.demo');
   const [password, setPassword] = useState('');
   const [show2FA, setShow2FA] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);

@@ -2,7 +2,7 @@ import { useApp } from '@/context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp } from 'lucide-react';
+import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -10,12 +10,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const stats = [
-    { label: 'Total Files', value: storage.fileCount, icon: Upload, color: 'text-primary' },
-    { label: 'Share Links', value: shareLinks.length, icon: Link2, color: 'text-accent' },
-    { label: 'Folders', value: folders.length, icon: FolderOpen, color: 'text-primary' },
-    { label: 'Collections', value: collections.length, icon: Layers, color: 'text-accent' },
-    { label: 'Storage Used', value: formatBytes(storage.used), icon: HardDrive, color: 'text-primary' },
-    { label: 'Uploads This Week', value: activity.uploadsThisWeek, icon: TrendingUp, color: 'text-accent' },
+    { label: 'Total Files', value: storage.fileCount, icon: Upload, color: 'text-primary', route: '/app/library' },
+    { label: 'Share Links', value: shareLinks.length, icon: Link2, color: 'text-accent', route: '/app/shared' },
+    { label: 'Folders', value: folders.length, icon: FolderOpen, color: 'text-primary', route: '/app/folders' },
+    { label: 'Collections', value: collections.length, icon: Layers, color: 'text-accent', route: '/app/collections' },
+    { label: 'Storage Used', value: formatBytes(storage.used), icon: HardDrive, color: 'text-primary', route: '/app/storage' },
+    { label: 'Uploads This Week', value: activity.uploadsThisWeek, icon: TrendingUp, color: 'text-accent', route: '/app/analytics' },
   ];
 
   return (
@@ -25,13 +25,18 @@ export default function Dashboard() {
         <p className="text-muted-foreground text-sm">Welcome back. Here's your media overview.</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {stats.map(s => (
-          <Card key={s.label} className="shadow-card border-border">
-            <CardContent className="p-4 text-center">
-              <s.icon className={`h-5 w-5 mx-auto mb-2 ${s.color}`} />
-              <p className="text-2xl font-bold text-foreground">{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
+          <Card
+            key={s.label}
+            className="shadow-card border-border cursor-pointer transition-all duration-150 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm"
+            onClick={() => navigate(s.route)}
+          >
+            <CardContent className="p-3 md:p-4 text-center relative">
+              <s.icon className={`h-5 w-5 mx-auto mb-1.5 ${s.color}`} />
+              <p className="text-xl md:text-2xl font-bold text-foreground">{s.value}</p>
+              <p className="text-[11px] text-muted-foreground">{s.label}</p>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 absolute top-2 right-2" />
             </CardContent>
           </Card>
         ))}

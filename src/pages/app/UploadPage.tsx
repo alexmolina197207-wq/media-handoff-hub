@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,21 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Image, Video, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Upload, Image, Video, CheckCircle, Sparkles, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+
+const AI_TAG_POOL = [
+  'screenshot', 'meme', 'product', 'group photo', 'document',
+  'short-form', 'tutorial', 'promo', 'archive', 'lifestyle',
+  'behind-the-scenes', 'announcement', 'testimonial', 'infographic',
+];
+
+function pickSuggestedTags(count = 5): string[] {
+  const shuffled = [...AI_TAG_POOL].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 export default function UploadPage() {
   const { folders, collections, addMedia } = useApp();
@@ -17,11 +29,44 @@ export default function UploadPage() {
   const [fileSelected, setFileSelected] = useState(false);
   const [fileType, setFileType] = useState<'image' | 'video'>('image');
   const [title, setTitle] = useState('');
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
   const [folder, setFolder] = useState('');
   const [collection, setCollection] = useState('');
   const [notes, setNotes] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleFileSelect = useCallback(() => {
+    setFileSelected(true);
+    // Simulate AI analysis delay
+    setTimeout(() => {
+      setSuggestedTags(pickSuggestedTags(5));
+      setShowSuggestions(true);
+    }, 800);
+  }, []);
+
+  const acceptTag = (tag: string) => {
+    if (!tags.includes(tag)) setTags(prev => [...prev, tag]);
+    setSuggestedTags(prev => prev.filter(t => t !== tag));
+  };
+
+  const dismissTag = (tag: string) => {
+    setSuggestedTags(prev => prev.filter(t => t !== tag));
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(prev => prev.filter(t => t !== tag));
+  };
+
+  const addManualTag = () => {
+    const t = tagInput.trim().toLowerCase();
+    if (t && !tags.includes(t)) {
+      setTags(prev => [...prev, t]);
+      setTagInput('');
+    }
+  };
 
   const simulateUpload = () => {
     if (!title.trim()) { toast.error('Please enter a title'); return; }
@@ -31,7 +76,7 @@ export default function UploadPage() {
         id: `m-${Date.now()}`,
         title: title.trim(),
         type: fileType,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags,
         size: Math.floor(Math.random() * 20000000) + 500000,
         folderId: folder || null,
         collectionId: collection || null,
@@ -58,8 +103,8 @@ export default function UploadPage() {
           className={`shadow-card border-2 border-dashed cursor-pointer transition-colors ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
           onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
-          onDrop={e => { e.preventDefault(); setIsDragging(false); setFileSelected(true); }}
-          onClick={() => setFileSelected(true)}
+          onDrop={e => { e.preventDefault(); setIsDragging(false); handleFileSelect(); }}
+          onClick={handleFileSelect}
         >
           <CardContent className="py-16 text-center">
             <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -92,10 +137,62 @@ export default function UploadPage() {
               <Label>Title *</Label>
               <Input placeholder="My awesome media file" value={title} onChange={e => setTitle(e.target.value)} />
             </div>
+
+            {/* AI Suggested Tags */}
+            {showSuggestions && suggestedTags.length > 0 && (
+              <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-primary">
+                  <Sparkles className="h-4 w-4" />
+                  AI-Suggested Tags
+                </div>
+                <p className="text-xs text-muted-foreground">Tap to accept, or dismiss tags you don't need.</p>
+                <div className="flex flex-wrap gap-2">
+                  {suggestedTags.map(tag => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="cursor-pointer border-primary/30 hover:bg-primary/10 active:scale-95 transition-all pl-2.5 pr-1 gap-1"
+                    >
+                      <span onClick={() => acceptTag(tag)}>
+                        <Plus className="h-3 w-3 inline mr-0.5" />{tag}
+                      </span>
+                      <button onClick={() => dismissTag(tag)} className="ml-0.5 hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Active Tags */}
             <div className="space-y-2">
-              <Label>Tags (comma separated)</Label>
-              <Input placeholder="marketing, hero, product" value={tags} onChange={e => setTags(e.target.value)} />
+              <Label>Tags</Label>
+              <p className="text-xs text-muted-foreground">Tags can be auto-suggested by AI or added manually.</p>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map(tag => (
+                    <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                      {tag}
+                      <button onClick={() => removeTag(tag)} className="hover:text-destructive">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a tag…"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addManualTag())}
+                  className="flex-1"
+                />
+                <Button variant="outline" size="sm" onClick={addManualTag} disabled={!tagInput.trim()}>Add</Button>
+              </div>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Folder</Label>
@@ -124,7 +221,7 @@ export default function UploadPage() {
               <Button onClick={simulateUpload} disabled={uploading} className="flex-1">
                 {uploading ? 'Uploading...' : 'Upload File'}
               </Button>
-              <Button variant="outline" onClick={() => setFileSelected(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => { setFileSelected(false); setShowSuggestions(false); setSuggestedTags([]); setTags([]); }}>Cancel</Button>
             </div>
           </CardContent>
         </Card>

@@ -17,21 +17,31 @@ export function usePullToRefresh({
   const startY = useRef(0);
   const pulling = useRef(false);
 
+  // Find the nearest scrollable ancestor
+  const getScrollParent = useCallback((): HTMLElement | null => {
+    let el = containerRef.current?.parentElement;
+    while (el) {
+      const style = getComputedStyle(el);
+      if (/(auto|scroll)/.test(style.overflow + style.overflowY)) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }, []);
+
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    const el = containerRef.current;
-    if (!el || refreshing) return;
-    // Only start pull if scrolled to top
-    if (el.scrollTop <= 0) {
+    if (refreshing) return;
+    const scrollParent = getScrollParent();
+    const scrollTop = scrollParent ? scrollParent.scrollTop : 0;
+    if (scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
       pulling.current = true;
     }
-  }, [refreshing]);
+  }, [refreshing, getScrollParent]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!pulling.current || refreshing) return;
     const delta = e.touches[0].clientY - startY.current;
     if (delta > 0) {
-      // Dampen the pull with a sqrt curve
       const dampened = Math.min(Math.sqrt(delta) * 4, maxPull);
       setPullDistance(dampened);
       if (dampened > 10) e.preventDefault();
@@ -60,6 +70,7 @@ export function usePullToRefresh({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Listen on the container element itself for touch events
     el.addEventListener('touchstart', handleTouchStart, { passive: true });
     el.addEventListener('touchmove', handleTouchMove, { passive: false });
     el.addEventListener('touchend', handleTouchEnd);

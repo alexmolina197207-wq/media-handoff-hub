@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import DashboardLayout from "./components/DashboardLayout";
@@ -25,6 +26,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
+      <NotificationProvider>
       <AppProvider>
         <Toaster />
         <Sonner />
@@ -45,6 +47,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </AppProvider>
+      </NotificationProvider>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>

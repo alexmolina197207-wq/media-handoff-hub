@@ -131,7 +131,7 @@ export default function AppSettings() {
           <AlertTriangle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-foreground">Demo Environment</p>
-            <p className="text-xs text-muted-foreground">This is a simulated DropRelay instance. No real data is stored, no payments are processed, and all media is mock content. Everything resets on page reload.</p>
+            <p className="text-xs text-muted-foreground">This is a simulated AnyRelay instance. No real data is stored, no payments are processed, and all media is mock content. Everything resets on page reload.</p>
           </div>
         </CardContent>
       </Card>

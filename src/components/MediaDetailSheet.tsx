@@ -10,11 +10,15 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
   Image, Video, Link2, FolderOpen, Layers, FileText, Calendar,
-  HardDrive, Tag, Copy, Pencil, Check, X, Plus,
+  HardDrive, Tag, Copy, Pencil, Check, X, Plus, Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -25,7 +29,7 @@ interface Props {
 }
 
 export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props) {
-  const { media, folders, collections, shareLinks, addShareLink, updateMedia } = useApp();
+  const { media, folders, collections, shareLinks, addShareLink, updateMedia, deleteMedia } = useApp();
   const selected = media.find(m => m.id === mediaId);
   const [editing, setEditing] = useState(false);
 
@@ -330,6 +334,37 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
               <Link2 className="h-4 w-4 mr-1" /> Create Share Link
             </Button>
           </div>
+
+          {/* Delete */}
+          <Separator />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="w-full">
+                <Trash2 className="h-4 w-4 mr-1" /> Delete File
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete "{selected.title}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently remove this file and all its share links. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    deleteMedia(selected.id);
+                    onClose();
+                    toast.success('File deleted');
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </SheetContent>
     </Sheet>

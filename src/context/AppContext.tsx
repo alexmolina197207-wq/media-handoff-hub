@@ -18,6 +18,7 @@ interface AppState {
   addMedia: (m: MediaFile) => void;
   updateMedia: (id: string, updates: Partial<MediaFile>) => void;
   addShareLink: (s: ShareLink) => void;
+  updateShareLink: (id: string, updates: Partial<ShareLink>) => void;
   upgradeUser: () => void;
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;

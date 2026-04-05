@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { MediaFile, formatBytes, formatDate } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';
@@ -18,9 +18,10 @@ import {
 } from '@/components/ui/select';
 import {
   Image, Video, Link2, FolderOpen, Layers, FileText, Calendar,
-  HardDrive, Tag, Copy, Pencil, Check, X, Plus, Trash2,
+  HardDrive, Tag, Copy, Pencil, Check, X, Plus, Trash2, Play, Pause, Volume2, VolumeX, Maximize,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Slider } from '@/components/ui/slider';
 
 interface Props {
   mediaId: string | null;
@@ -147,9 +148,13 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
             )}
           </SheetHeader>
 
-          <div className="rounded-lg overflow-hidden border border-border">
-            <img src={selected.previewUrl} alt={selected.title} className="w-full aspect-video object-cover" />
-          </div>
+          {selected.type === 'video' && selected.videoUrl ? (
+            <VideoPlayer src={selected.videoUrl} poster={selected.previewUrl} />
+          ) : (
+            <div className="rounded-lg overflow-hidden border border-border">
+              <img src={selected.previewUrl} alt={selected.title} className="w-full aspect-video object-cover" />
+            </div>
+          )}
 
           {/* Metadata (read-only) */}
           <div className="grid grid-cols-2 gap-3">

@@ -183,7 +183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
-      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, upgradeUser,
+      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
     }}>

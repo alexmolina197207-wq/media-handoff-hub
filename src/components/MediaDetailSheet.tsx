@@ -128,6 +128,7 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
   );
 }
 
+export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props) {
   const { media, folders, collections, shareLinks, addShareLink, updateMedia, deleteMedia } = useApp();
   const selected = media.find(m => m.id === mediaId);
   const [editing, setEditing] = useState(false);

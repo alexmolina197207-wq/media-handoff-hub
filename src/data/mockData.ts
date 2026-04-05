@@ -14,6 +14,7 @@ export interface MediaFile {
   folderId: string | null;
   collectionId: string | null;
   previewUrl: string;
+  videoUrl?: string;
   notes: string;
   uploadedAt: string;
   source: string;

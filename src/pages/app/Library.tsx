@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen } from 'lucide-react';
+import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen, GripVertical } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import MediaDetailSheet from '@/components/MediaDetailSheet';
 
 export default function Library() {
-  const { media, folders, addShareLink } = useApp();
+  const { media, folders, addShareLink, reorderMedia } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('tag') || '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [typeFilter, setTypeFilter] = useState<'all' | 'image' | 'video'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +29,42 @@ export default function Library() {
     }
   }, [searchParams, setSearchParams]);
 
+  const isFiltered = !!(search || typeFilter !== 'all');
+
   const filtered = media.filter(m => {
     const q = search.toLowerCase();
     const matchSearch = !q || m.title.toLowerCase().includes(q) || m.tags.some(t => t.includes(q));
     const matchType = typeFilter === 'all' || m.type === typeFilter;
     return matchSearch && matchType;
   });
+
+  const handleDragStart = (id: string) => {
+    if (isFiltered) return;
+    setDragId(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    if (dragId && dragId !== id) setDragOverId(id);
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId || isFiltered) return;
+    const fromIdx = media.findIndex(m => m.id === dragId);
+    const toIdx = media.findIndex(m => m.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const reordered = [...media];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    reorderMedia(reordered);
+    setDragId(null);
+    setDragOverId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragId(null);
+    setDragOverId(null);
+  };
 
   const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -88,10 +120,19 @@ export default function Library() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map(m => {
             const folder = folders.find(f => f.id === m.folderId);
+            const isDragging = dragId === m.id;
+            const isDragOver = dragOverId === m.id;
             return (
               <Card
                 key={m.id}
-                className="shadow-card border-border overflow-hidden group hover:shadow-elevated transition-shadow cursor-pointer active:scale-[0.98]"
+                draggable={!isFiltered}
+                onDragStart={() => handleDragStart(m.id)}
+                onDragOver={(e) => handleDragOver(e, m.id)}
+                onDrop={() => handleDrop(m.id)}
+                onDragEnd={handleDragEnd}
+                className={`shadow-card border-border overflow-hidden group hover:shadow-elevated transition-all cursor-pointer active:scale-[0.98] ${
+                  isDragging ? 'opacity-40 scale-95' : ''
+                } ${isDragOver ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                 onClick={() => setSelectedId(m.id)}
               >
                 <div className="relative aspect-video bg-muted">
@@ -100,6 +141,11 @@ export default function Library() {
                     {m.type === 'video' ? <Video className="h-3 w-3 mr-1" /> : <Image className="h-3 w-3 mr-1" />}
                     {m.type}
                   </Badge>
+                  {!isFiltered && (
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <GripVertical className="h-4 w-4 text-foreground/70 drop-shadow" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2">
                     <Button size="icon" variant="secondary" className="h-8 w-8" onClick={(e) => createShareLink(m.id, e)}>
                       <Link2 className="h-4 w-4" />

@@ -80,7 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
-      isAuthenticated, setAuthenticated, addMedia, addShareLink, upgradeUser,
+      isAuthenticated, setAuthenticated, addMedia, updateMedia, addShareLink, upgradeUser,
       addFolder, reorderFolders, addCollection, deleteFolder, deleteCollection,
     }}>
       {children}

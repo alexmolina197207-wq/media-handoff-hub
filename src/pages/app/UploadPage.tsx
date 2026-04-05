@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Upload, Image, Video, X, RotateCcw, AlertTriangle, CheckCircle2,
-  FileWarning, Trash2, Ban, FolderOpen, Layers, Tag, Plus,
+  FileWarning, Trash2, Ban, FolderOpen, Layers, Tag, Plus, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ const ACCEPTED_TYPES: Record<string, 'image' | 'video'> = {
   'image/jpeg': 'image', 'image/png': 'image', 'image/webp': 'image', 'image/gif': 'image',
   'video/mp4': 'video', 'video/quicktime': 'video', 'video/webm': 'video',
 };
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 const ACCEPT_STRING = Object.keys(ACCEPTED_TYPES).join(',');
 
 type FileStatus = 'queued' | 'uploading' | 'complete' | 'error' | 'cancelled' | 'duplicate';
@@ -35,6 +36,7 @@ interface QueuedFile {
   progress: number;
   error?: string;
   previewUrl?: string;
+  tags: string[];
 }
 
 function fileId(file: File) {
@@ -51,66 +53,47 @@ export default function UploadPage() {
   const [selectedCollection, setSelectedCollection] = useState<string>('none');
   const abortRefs = useRef<Map<string, () => void>>(new Map());
   const dragCounter = useRef(0);
-  const [uploadTags, setUploadTags] = useState<string[]>([]);
+
+  // Bulk tag state — these are "pending" tags the user builds, applied explicitly
+  const [bulkTags, setBulkTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [applyToAll, setApplyToAll] = useState(true);
 
   // --- Validation ---
   const validateFile = useCallback((file: File): { ok: boolean; error?: string } => {
-    if (!ACCEPTED_TYPES[file.type]) {
-      return { ok: false, error: `Unsupported type: ${file.type || 'unknown'}` };
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return { ok: false, error: `File too large (max ${formatBytes(MAX_FILE_SIZE)})` };
-    }
+    if (!ACCEPTED_TYPES[file.type]) return { ok: false, error: `Unsupported type: ${file.type || 'unknown'}` };
+    if (file.size > MAX_FILE_SIZE) return { ok: false, error: `File too large (max ${formatBytes(MAX_FILE_SIZE)})` };
     return { ok: true };
   }, []);
 
   const isDuplicate = useCallback((file: File): boolean => {
-    // Check against existing library
-    const existsInLibrary = media.some(
-      m => m.title === file.name && Math.abs(m.size - file.size) < 1024
-    );
-    return existsInLibrary;
+    return media.some(m => m.title === file.name && Math.abs(m.size - file.size) < 1024);
   }, [media]);
 
-  // --- Add files to queue ---
+  // --- Add files to queue (new files start with NO tags) ---
   const enqueueFiles = useCallback((files: FileList | File[]) => {
     const newItems: QueuedFile[] = [];
-    const fileArray = Array.from(files);
-
-    for (const file of fileArray) {
+    for (const file of Array.from(files)) {
       const id = fileId(file);
-      // Check already in queue
-      setQueue(prev => {
-        if (prev.some(q => q.id === id && q.status !== 'cancelled' && q.status !== 'error')) return prev;
-        return prev;
-      });
-
       const validation = validateFile(file);
       const duplicate = isDuplicate(file);
-
       let previewUrl: string | undefined;
-      if (ACCEPTED_TYPES[file.type] === 'image') {
-        previewUrl = URL.createObjectURL(file);
-      }
+      if (ACCEPTED_TYPES[file.type] === 'image') previewUrl = URL.createObjectURL(file);
 
       newItems.push({
-        id,
-        file,
-        name: file.name,
-        size: file.size,
+        id, file, name: file.name, size: file.size,
         mediaType: ACCEPTED_TYPES[file.type] || 'image',
         status: !validation.ok ? 'error' : duplicate ? 'duplicate' : 'queued',
         progress: 0,
         error: validation.ok ? undefined : validation.error,
         previewUrl,
+        tags: [], // start empty — user opts in
       });
     }
 
     setQueue(prev => {
       const existingIds = new Set(prev.filter(q => q.status !== 'cancelled' && q.status !== 'error').map(q => q.id));
       const deduped = newItems.filter(n => !existingIds.has(n.id));
-      // Also check for duplicate names within the new batch
       const seen = new Set<string>();
       const filtered: QueuedFile[] = [];
       for (const item of deduped) {
@@ -122,7 +105,41 @@ export default function UploadPage() {
     });
   }, [validateFile, isDuplicate]);
 
-  // --- Simulate upload for a single file ---
+  // --- Apply bulk tags to all queued/duplicate files ---
+  const applyBulkTagsToAll = useCallback(() => {
+    if (bulkTags.length === 0) return;
+    setQueue(prev => prev.map(q => {
+      if (q.status === 'complete' || q.status === 'error' || q.status === 'cancelled') return q;
+      return { ...q, tags: [...new Set([...q.tags, ...bulkTags])] };
+    }));
+    toast.success(`Applied ${bulkTags.length} tag${bulkTags.length > 1 ? 's' : ''} to all files`);
+  }, [bulkTags]);
+
+  // When applyToAll is on, sync bulk tag changes to pending files automatically
+  useEffect(() => {
+    if (!applyToAll) return;
+    setQueue(prev => prev.map(q => {
+      if (q.status === 'complete' || q.status === 'error' || q.status === 'cancelled') return q;
+      const merged = [...new Set([...q.tags, ...bulkTags])];
+      if (merged.length === q.tags.length && merged.every(t => q.tags.includes(t))) return q;
+      return { ...q, tags: merged };
+    }));
+  }, [bulkTags, applyToAll]);
+
+  // --- Per-file tag management ---
+  const addTagToFile = (fileId: string, tag: string) => {
+    setQueue(prev => prev.map(q =>
+      q.id === fileId && !q.tags.includes(tag) ? { ...q, tags: [...q.tags, tag] } : q
+    ));
+  };
+
+  const removeTagFromFile = (fileId: string, tag: string) => {
+    setQueue(prev => prev.map(q =>
+      q.id === fileId ? { ...q, tags: q.tags.filter(t => t !== tag) } : q
+    ));
+  };
+
+  // --- Simulate upload ---
   const uploadFile = useCallback((id: string) => {
     setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'uploading', progress: 0, error: undefined } : q));
 
@@ -136,12 +153,11 @@ export default function UploadPage() {
         clearInterval(interval);
         setQueue(prev => prev.map(q => {
           if (q.id !== id) return q;
-          // Add to media library
           addMedia({
             id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             title: q.name,
             type: q.mediaType,
-            tags: [...uploadTags],
+            tags: [...q.tags], // use THIS file's tags
             size: q.size,
             folderId: selectedFolder !== 'none' ? selectedFolder : null,
             collectionId: selectedCollection !== 'none' ? selectedCollection : null,
@@ -163,12 +179,12 @@ export default function UploadPage() {
       clearInterval(interval);
       setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'cancelled', progress: 0 } : q));
     });
-  }, [addMedia]);
+  }, [addMedia, selectedFolder, selectedCollection]);
 
-  // --- Auto-start queued files (one at a time) ---
+  // --- Auto-start queued files ---
   useEffect(() => {
     const uploading = queue.filter(q => q.status === 'uploading');
-    if (uploading.length >= 2) return; // max 2 concurrent
+    if (uploading.length >= 2) return;
     const next = queue.find(q => q.status === 'queued');
     if (next) uploadFile(next.id);
   }, [queue, uploadFile]);
@@ -205,21 +221,11 @@ export default function UploadPage() {
   };
 
   // --- Drag & Drop ---
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounter.current++;
-    setIsDragging(true);
-  };
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounter.current--;
-    if (dragCounter.current <= 0) { setIsDragging(false); dragCounter.current = 0; }
-  };
+  const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); dragCounter.current++; setIsDragging(true); };
+  const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); dragCounter.current--; if (dragCounter.current <= 0) { setIsDragging(false); dragCounter.current = 0; } };
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); };
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    dragCounter.current = 0;
+    e.preventDefault(); setIsDragging(false); dragCounter.current = 0;
     if (e.dataTransfer.files.length) enqueueFiles(e.dataTransfer.files);
   };
 
@@ -232,6 +238,13 @@ export default function UploadPage() {
   const completedCount = queue.filter(q => q.status === 'complete').length;
   const totalCount = queue.length;
   const hasActive = queue.some(q => q.status === 'uploading' || q.status === 'queued');
+  const pendingFiles = queue.filter(q => q.status === 'queued' || q.status === 'duplicate');
+
+  // Helper to add a bulk tag
+  const addBulkTag = (tag: string) => {
+    const t = tag.trim().toLowerCase();
+    if (t && !bulkTags.includes(t)) setBulkTags(prev => [...prev, t]);
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
@@ -250,21 +263,15 @@ export default function UploadPage() {
       {/* Drop zone */}
       <Card
         className={`border-2 border-dashed cursor-pointer transition-all ${
-          isDragging
-            ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg'
-            : 'border-border hover:border-primary/50'
+          isDragging ? 'border-primary bg-primary/5 scale-[1.01] shadow-lg' : 'border-border hover:border-primary/50'
         }`}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
+        onDragEnter={handleDragEnter} onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver} onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
       >
         <CardContent className="py-12 text-center">
           <Upload className={`h-10 w-10 mx-auto mb-3 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
-          <p className="text-foreground font-medium mb-1">
-            {isDragging ? 'Drop files here' : 'Drag & drop files here'}
-          </p>
+          <p className="text-foreground font-medium mb-1">{isDragging ? 'Drop files here' : 'Drag & drop files here'}</p>
           <p className="text-sm text-muted-foreground mb-3">or click to browse</p>
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <Image className="h-3.5 w-3.5" /> JPEG, PNG, WebP, GIF
@@ -275,14 +282,7 @@ export default function UploadPage() {
         </CardContent>
       </Card>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPT_STRING}
-        multiple
-        className="hidden"
-        onChange={handleInputChange}
-      />
+      <input ref={inputRef} type="file" accept={ACCEPT_STRING} multiple className="hidden" onChange={handleInputChange} />
 
       {/* Folder & Collection picker */}
       {queue.length > 0 && (
@@ -294,14 +294,10 @@ export default function UploadPage() {
                   <FolderOpen className="h-3.5 w-3.5" /> Upload to folder
                 </Label>
                 <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="No folder" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="No folder" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No folder</SelectItem>
-                    {folders.map(f => (
-                      <SelectItem key={f.id} value={f.id}>{f.icon} {f.name}</SelectItem>
-                    ))}
+                    {folders.map(f => <SelectItem key={f.id} value={f.id}>{f.icon} {f.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -310,14 +306,10 @@ export default function UploadPage() {
                   <Layers className="h-3.5 w-3.5" /> Collection
                 </Label>
                 <Select value={selectedCollection} onValueChange={setSelectedCollection}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="No collection" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="No collection" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No collection</SelectItem>
-                    {collections.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
+                    {collections.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -334,15 +326,28 @@ export default function UploadPage() {
         </Card>
       )}
 
-      {/* Tags for upload */}
+      {/* Bulk tagging section */}
       {queue.length > 0 && (
         <Card className="border-border">
           <CardContent className="p-4 space-y-3">
-            <Label className="text-xs flex items-center gap-1 text-muted-foreground">
-              <Tag className="h-3.5 w-3.5" /> Tags for uploaded files
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                <Tag className="h-3.5 w-3.5" /> Bulk Tags
+              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="apply-all-toggle" className="text-[10px] text-muted-foreground cursor-pointer">
+                  Apply to all files
+                </Label>
+                <Switch
+                  id="apply-all-toggle"
+                  checked={applyToAll}
+                  onCheckedChange={setApplyToAll}
+                  className="scale-75"
+                />
+              </div>
+            </div>
 
-            {/* Manual tag input */}
+            {/* Tag input */}
             <div className="flex gap-1.5">
               <Input
                 placeholder="Add a tag…"
@@ -351,60 +356,53 @@ export default function UploadPage() {
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    const t = tagInput.trim().toLowerCase();
-                    if (t && !uploadTags.includes(t)) setUploadTags(prev => [...prev, t]);
+                    addBulkTag(tagInput);
                     setTagInput('');
                   }
                 }}
                 className="h-8 text-sm"
               />
               <Button
-                size="sm"
-                className="h-8"
+                size="sm" className="h-8"
                 disabled={!tagInput.trim()}
-                onClick={() => {
-                  const t = tagInput.trim().toLowerCase();
-                  if (t && !uploadTags.includes(t)) setUploadTags(prev => [...prev, t]);
-                  setTagInput('');
-                }}
+                onClick={() => { addBulkTag(tagInput); setTagInput(''); }}
               >
                 <Plus className="h-3.5 w-3.5" />
               </Button>
             </div>
 
-            {/* Current tags */}
-            {uploadTags.length > 0 && (
+            {/* Bulk tag chips */}
+            {bulkTags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {uploadTags.map(tag => (
+                {bulkTags.map(tag => (
                   <Badge key={tag} variant="secondary" className="text-xs gap-1 pr-1">
                     {tag}
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-destructive"
-                      onClick={() => setUploadTags(prev => prev.filter(t => t !== tag))}
+                      onClick={() => setBulkTags(prev => prev.filter(t => t !== tag))}
                     />
                   </Badge>
                 ))}
               </div>
             )}
 
-            {/* Quick-apply presets */}
+            {/* Preset quick-apply */}
             {tagPresets.length > 0 && (
               <div className="space-y-1.5">
                 <p className="text-[10px] text-muted-foreground font-medium">Quick add from presets</p>
                 <div className="flex flex-wrap gap-1.5">
                   {tagPresets.map(preset => {
-                    const allApplied = preset.tags.every(t => uploadTags.includes(t));
+                    const allApplied = preset.tags.every(t => bulkTags.includes(t));
                     return (
                       <Button
-                        key={preset.id}
-                        size="sm"
+                        key={preset.id} size="sm"
                         variant={allApplied ? 'default' : 'outline'}
                         className="h-7 text-xs px-2.5"
                         onClick={() => {
                           if (allApplied) {
-                            setUploadTags(prev => prev.filter(t => !preset.tags.includes(t)));
+                            setBulkTags(prev => prev.filter(t => !preset.tags.includes(t)));
                           } else {
-                            setUploadTags(prev => [...new Set([...prev, ...preset.tags])]);
+                            setBulkTags(prev => [...new Set([...prev, ...preset.tags])]);
                           }
                         }}
                       >
@@ -416,25 +414,28 @@ export default function UploadPage() {
               </div>
             )}
 
-            {uploadTags.length > 0 && (
-              <p className="text-[10px] text-muted-foreground">
-                {uploadTags.length} tag{uploadTags.length > 1 ? 's' : ''} will be applied to all uploaded files
-              </p>
+            {/* Manual apply button when toggle is off */}
+            {!applyToAll && bulkTags.length > 0 && pendingFiles.length > 0 && (
+              <Button size="sm" variant="outline" className="w-full h-8 text-xs" onClick={applyBulkTagsToAll}>
+                Apply {bulkTags.length} tag{bulkTags.length > 1 ? 's' : ''} to {pendingFiles.length} pending file{pendingFiles.length > 1 ? 's' : ''}
+              </Button>
             )}
+
+            <p className="text-[10px] text-muted-foreground">
+              {applyToAll
+                ? `Tags are auto-applied to all pending files. Edit per-file tags below.`
+                : `Add tags here, then apply to all or edit tags on individual files.`}
+            </p>
           </CardContent>
         </Card>
       )}
 
       {queue.length > 0 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">
-            {completedCount}/{totalCount} uploaded
-          </p>
+          <p className="text-sm font-medium text-foreground">{completedCount}/{totalCount} uploaded</p>
           <div className="flex gap-2">
             {completedCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearCompleted}>
-                Clear completed
-              </Button>
+              <Button variant="ghost" size="sm" onClick={clearCompleted}>Clear completed</Button>
             )}
             {hasActive && (
               <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"
@@ -456,6 +457,8 @@ export default function UploadPage() {
             onRetry={() => retryFile(item.id)}
             onRemove={() => removeFile(item.id)}
             onForceUpload={() => forceUploadDuplicate(item.id)}
+            onAddTag={(tag) => addTagToFile(item.id, tag)}
+            onRemoveTag={(tag) => removeTagFromFile(item.id, tag)}
           />
         ))}
       </div>
@@ -471,41 +474,27 @@ export default function UploadPage() {
 
 // --- File queue item component ---
 function FileQueueItem({
-  item,
-  onCancel,
-  onRetry,
-  onRemove,
-  onForceUpload,
+  item, onCancel, onRetry, onRemove, onForceUpload, onAddTag, onRemoveTag,
 }: {
   item: QueuedFile;
   onCancel: () => void;
   onRetry: () => void;
   onRemove: () => void;
   onForceUpload: () => void;
+  onAddTag: (tag: string) => void;
+  onRemoveTag: (tag: string) => void;
 }) {
+  const [showTags, setShowTags] = useState(false);
+  const [localTagInput, setLocalTagInput] = useState('');
+  const canEditTags = item.status !== 'complete' && item.status !== 'cancelled' && item.status !== 'error';
+
   const statusConfig: Record<FileStatus, { icon: React.ReactNode; label: string; color: string }> = {
     queued: { icon: null, label: 'Waiting…', color: 'text-muted-foreground' },
     uploading: { icon: null, label: `${Math.round(item.progress)}%`, color: 'text-primary' },
-    complete: {
-      icon: <CheckCircle2 className="h-4 w-4 text-accent" />,
-      label: 'Done',
-      color: 'text-accent',
-    },
-    error: {
-      icon: <AlertTriangle className="h-4 w-4 text-destructive" />,
-      label: item.error || 'Failed',
-      color: 'text-destructive',
-    },
-    cancelled: {
-      icon: <Ban className="h-4 w-4 text-muted-foreground" />,
-      label: 'Cancelled',
-      color: 'text-muted-foreground',
-    },
-    duplicate: {
-      icon: <FileWarning className="h-4 w-4 text-yellow-500" />,
-      label: 'Duplicate',
-      color: 'text-yellow-500',
-    },
+    complete: { icon: <CheckCircle2 className="h-4 w-4 text-accent" />, label: 'Done', color: 'text-accent' },
+    error: { icon: <AlertTriangle className="h-4 w-4 text-destructive" />, label: item.error || 'Failed', color: 'text-destructive' },
+    cancelled: { icon: <Ban className="h-4 w-4 text-muted-foreground" />, label: 'Cancelled', color: 'text-muted-foreground' },
+    duplicate: { icon: <FileWarning className="h-4 w-4 text-yellow-500" />, label: 'Duplicate', color: 'text-yellow-500' },
   };
 
   const { icon, label, color } = statusConfig[item.status];
@@ -516,7 +505,7 @@ function FileQueueItem({
     } ${item.status === 'error' ? 'border-destructive/30 bg-destructive/5' : ''}`}>
       <CardContent className="p-3">
         <div className="flex items-center gap-3">
-          {/* Thumbnail or icon */}
+          {/* Thumbnail */}
           <div className="h-10 w-10 rounded-md bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden">
             {item.previewUrl ? (
               <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />
@@ -532,14 +521,20 @@ function FileQueueItem({
             <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
             <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground">{formatBytes(item.size)}</span>
-              <span className={`flex items-center gap-1 ${color}`}>
-                {icon} {label}
-              </span>
+              <span className={`flex items-center gap-1 ${color}`}>{icon} {label}</span>
+              {item.tags.length > 0 && (
+                <span className="text-muted-foreground">· {item.tags.length} tag{item.tags.length > 1 ? 's' : ''}</span>
+              )}
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-1 flex-shrink-0">
+            {canEditTags && (
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowTags(!showTags)}>
+                {showTags ? <ChevronUp className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
+              </Button>
+            )}
             {item.status === 'uploading' && (
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onCancel}>
                 <X className="h-3.5 w-3.5" />
@@ -563,12 +558,62 @@ function FileQueueItem({
           </div>
         </div>
 
+        {/* Per-file tag chips (always visible if tags exist) */}
+        {item.tags.length > 0 && !showTags && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {item.tags.map(tag => (
+              <Badge key={tag} variant="outline" className="text-[10px] gap-0.5 pr-1 h-5">
+                {tag}
+                {canEditTags && (
+                  <X className="h-2.5 w-2.5 cursor-pointer hover:text-destructive" onClick={() => onRemoveTag(tag)} />
+                )}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Expanded per-file tag editor */}
+        {showTags && canEditTags && (
+          <div className="mt-2 space-y-2 pt-2 border-t border-border">
+            <div className="flex flex-wrap gap-1">
+              {item.tags.map(tag => (
+                <Badge key={tag} variant="secondary" className="text-[10px] gap-0.5 pr-1 h-5">
+                  {tag}
+                  <X className="h-2.5 w-2.5 cursor-pointer hover:text-destructive" onClick={() => onRemoveTag(tag)} />
+                </Badge>
+              ))}
+              {item.tags.length === 0 && (
+                <span className="text-[10px] text-muted-foreground">No tags yet</span>
+              )}
+            </div>
+            <div className="flex gap-1">
+              <Input
+                placeholder="Add tag…"
+                value={localTagInput}
+                onChange={e => setLocalTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const t = localTagInput.trim().toLowerCase();
+                    if (t) { onAddTag(t); setLocalTagInput(''); }
+                  }
+                }}
+                className="h-7 text-xs"
+              />
+              <Button
+                size="sm" className="h-7 px-2"
+                disabled={!localTagInput.trim()}
+                onClick={() => { const t = localTagInput.trim().toLowerCase(); if (t) { onAddTag(t); setLocalTagInput(''); } }}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Progress bar */}
         {(item.status === 'uploading' || item.status === 'queued') && (
-          <Progress
-            value={item.progress}
-            className="h-1.5 mt-2"
-          />
+          <Progress value={item.progress} className="h-1.5 mt-2" />
         )}
 
         {/* Duplicate warning */}

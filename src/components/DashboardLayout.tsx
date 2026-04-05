@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import NotificationCenter from '@/components/NotificationCenter';
 import { cn } from '@/lib/utils';
+import anyrelayLogo from '@/assets/anyrelay-logo.png';
 
 const navItems = [
   { title: 'Dashboard', url: '/app', icon: LayoutDashboard },
@@ -50,10 +51,8 @@ function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border hidden md:flex">
       <SidebarContent>
         <div className="p-4 flex items-center gap-2 border-b border-sidebar-border">
-          <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center shrink-0">
-            <span className="font-bold text-xs" style={{color:'white'}}>DR</span>
-          </div>
-          {!collapsed && <span className="font-bold text-sidebar-foreground">DropRelay</span>}
+          <img src={anyrelayLogo} alt="AnyRelay" className="w-8 h-8 shrink-0" />
+          {!collapsed && <span className="font-bold text-sidebar-foreground">AnyRelay</span>}
         </div>
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/50">Navigation</SidebarGroupLabel>

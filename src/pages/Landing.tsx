@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Upload, FolderOpen, Link2, BarChart3, Shield, Zap, Star, Check } from 'lucide-react';
+import anyrelayLogo from '@/assets/anyrelay-logo.png';
 
 const features = [
   { icon: Upload, title: 'Quick Upload', desc: 'Drag-drop any media file. Tag it, folder it, share it — in seconds.' },
@@ -10,7 +11,7 @@ const features = [
   { icon: Link2, title: 'Share Links', desc: 'Generate instant share links with expiry controls and click tracking.' },
   { icon: BarChart3, title: 'Usage Analytics', desc: 'See what you share most, track storage, and monitor link activity.' },
   { icon: Shield, title: 'Access Controls', desc: 'Public, private, or password-protected. You decide who sees what.' },
-  { icon: Zap, title: 'Cross-Platform', desc: 'One library for every platform. Repost, repurpose, and reuse effortlessly.' },
+  { icon: Zap, title: 'Cross-Platform', desc: 'Share across any network or device. Repost, repurpose, and reuse effortlessly.' },
 ];
 
 const pricing = [
@@ -20,15 +21,15 @@ const pricing = [
 ];
 
 const testimonials = [
-  { name: 'Jordan K.', role: 'Content Creator', text: 'DropRelay replaced three tools I was juggling. Upload once, share everywhere — it just works.', rating: 5 },
+  { name: 'Jordan K.', role: 'Content Creator', text: 'AnyRelay replaced three tools I was juggling. Upload once, share everywhere — it just works.', rating: 5 },
   { name: 'Priya S.', role: 'Social Media Manager', text: 'The folder system is exactly what I needed. Separate content per platform without the mess.', rating: 5 },
   { name: 'Marcus T.', role: 'Freelance Editor', text: 'Client drops are a game changer. They upload, I organize, we both win.', rating: 5 },
 ];
 
 const faqs = [
-  { q: 'What is DropRelay?', a: 'DropRelay is a cross-platform media handoff tool. Save, organize, and re-share images and videos across all your platforms from one cloud-style library.' },
-  { q: 'Is my media stored securely?', a: 'Yes. All files are encrypted at rest and in transit. Access controls let you set public, private, or password-protected permissions on every share link.' },
-  { q: 'Can I use DropRelay for team collaboration?', a: 'Absolutely. Our Team plan includes shared workspaces, client drop zones, and role-based access for your whole team.' },
+  { q: 'What is AnyRelay?', a: 'AnyRelay is a private, secure file sharing platform. Share files across any network or device from one cloud-style library.' },
+  { q: 'Is my data stored securely?', a: 'Yes. All files are encrypted at rest and in transit. Access controls let you set public, private, or password-protected permissions on every share link.' },
+  { q: 'Can I use AnyRelay for team collaboration?', a: 'Absolutely. Our Team plan includes shared workspaces, client drop zones, and role-based access for your whole team.' },
   { q: 'What file formats are supported?', a: 'We support all major image formats (JPEG, PNG, WebP, GIF, SVG) and video formats (MP4, MOV, WebM). More coming soon.' },
   { q: 'How do share links work?', a: 'Generate a unique URL for any media file. Set an expiry date, access level, and track clicks. Recipients don\'t need an account to view.' },
 ];
@@ -42,10 +43,8 @@ export default function Landing() {
       <nav className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center">
-              <span className="font-bold text-sm" style={{color:'white'}}>DR</span>
-            </div>
-            <span className="font-bold text-lg text-foreground">DropRelay</span>
+            <img src={anyrelayLogo} alt="AnyRelay" className="w-8 h-8" />
+            <span className="font-bold text-lg text-foreground">AnyRelay</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -64,12 +63,12 @@ export default function Landing() {
         <div className="container mx-auto text-center max-w-3xl animate-fade-in">
           <Badge variant="secondary" className="mb-4">Now in public demo</Badge>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
-            One library for all your<br />
-            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>cross-platform media</span>
+            Private, secure file sharing<br />
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>across any network or device</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Upload, organize, and share images & videos across every platform.
-            DropRelay is the fastest way to save, tag, and re-share your content — no friction.
+            Upload, organize, and share files across every platform.
+            AnyRelay is the fastest way to securely send and manage your content — no friction.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button size="lg" onClick={() => navigate('/login')}>
@@ -185,8 +184,8 @@ export default function Landing() {
       {/* CTA */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to simplify your media workflow?</h2>
-          <p className="text-muted-foreground mb-8">Try the demo — no signup required. See how DropRelay makes media handoff effortless.</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to simplify your file sharing?</h2>
+          <p className="text-muted-foreground mb-8">Try the demo — no signup required. See how AnyRelay makes secure file sharing effortless.</p>
           <Button size="lg" onClick={() => navigate('/login')}>
             Start Demo <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -197,10 +196,8 @@ export default function Landing() {
       <footer className="border-t border-border py-8 px-4">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded gradient-hero flex items-center justify-center">
-              <span className="text-xs font-bold" style={{color:'white'}}>DR</span>
-            </div>
-            <span>DropRelay © 2025</span>
+            <img src={anyrelayLogo} alt="AnyRelay" className="w-6 h-6" />
+            <span>AnyRelay © 2025</span>
           </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-foreground transition-colors">Privacy</a>

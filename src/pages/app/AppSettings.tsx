@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { AlertTriangle, Moon, Sun } from 'lucide-react';
+import SecuritySettings from '@/components/SecuritySettings';
 
 export default function AppSettings() {
   const { user, upgradeUser } = useApp();
@@ -51,6 +52,8 @@ export default function AppSettings() {
           </div>
         </CardContent>
       </Card>
+
+      <SecuritySettings />
 
       <Card className="shadow-card border-border">
         <CardHeader>

@@ -12,7 +12,11 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
-import { GripVertical, Plus, Link2, ChevronRight } from 'lucide-react';
+import { GripVertical, Plus, Link2, ChevronRight, Trash2 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { formatBytes, formatDate } from '@/data/mockData';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 const EMOJI_OPTIONS = ['📁', '📂', '📸', '🎬', '🎵', '📱', '💼', '🎨', '🗂️', '📦', '🚀', '💎'];
 
 export default function Folders() {
-  const { folders, media, addFolder, reorderFolders, addShareLink } = useApp();
+  const { folders, media, addFolder, reorderFolders, addShareLink, deleteFolder } = useApp();
   const navigate = useNavigate();
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
@@ -200,11 +204,37 @@ export default function Folders() {
                 <p className="text-sm text-muted-foreground">{selected.description}</p>
               </SheetHeader>
 
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary">{selectedItems.length} files</Badge>
-                <Badge variant="outline">
-                  {formatBytes(selectedItems.reduce((a, m) => a + m.size, 0))} total
-                </Badge>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary">{selectedItems.length} files</Badge>
+                  <Badge variant="outline">
+                    {formatBytes(selectedItems.reduce((a, m) => a + m.size, 0))} total
+                  </Badge>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete "{selected.name}"?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove the folder. Files inside will be unassigned but not deleted.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => { deleteFolder(selected.id); setSelectedId(null); toast.success('Folder deleted'); }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               {selectedItems.length > 0 ? (

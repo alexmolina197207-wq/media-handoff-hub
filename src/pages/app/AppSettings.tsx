@@ -153,12 +153,12 @@ export default function AppSettings() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               onClick={() => { setDeleteStep('confirm'); setConfirmText(''); }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Continue
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

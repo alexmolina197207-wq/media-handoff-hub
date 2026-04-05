@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Upload, FolderOpen, Link2, BarChart3, Shield, Zap, Star, Check } from 'lucide-react';
-const anyrelayLogo = "https://cdn-icons-png.flaticon.com/512/3987/3987850.png";
+import anyrelayLogo from '@/assets/anyrelay-logo.png';
 
 const features = [
   { icon: Upload, title: 'Quick Upload', desc: 'Drag-drop any media file. Tag it, folder it, share it — in seconds.' },

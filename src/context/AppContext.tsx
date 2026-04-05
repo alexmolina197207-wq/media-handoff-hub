@@ -41,6 +41,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setStorage(prev => ({ ...prev, fileCount: prev.fileCount + 1, used: prev.used + m.size, recentUploads: prev.recentUploads + 1 }));
   };
 
+  const updateMedia = (id: string, updates: Partial<MediaFile>) => {
+    setMedia(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  };
+
   const addShareLink = (s: ShareLink) => {
     setShareLinks(prev => [s, ...prev]);
   };

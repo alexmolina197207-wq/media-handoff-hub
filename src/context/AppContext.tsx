@@ -26,6 +26,8 @@ interface AppState {
   deleteMedia: (id: string) => void;
   bulkDeleteMedia: (ids: string[]) => void;
   bulkMoveToFolder: (ids: string[], folderId: string | null) => void;
+  bulkAddTags: (ids: string[], tags: string[]) => void;
+  bulkRemoveTags: (ids: string[], tags: string[]) => void;
   deleteFolder: (id: string) => void;
   deleteCollection: (id: string) => void;
   twoFactorEnabled: boolean;

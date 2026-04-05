@@ -1,15 +1,18 @@
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Moon, Sun } from 'lucide-react';
 
 export default function AppSettings() {
   const { user, upgradeUser } = useApp();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="max-w-2xl space-y-6 animate-fade-in">
@@ -30,6 +33,22 @@ export default function AppSettings() {
             <Input defaultValue={user.email} />
           </div>
           <Button onClick={() => toast.success('Profile saved (demo)')}>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card border-border">
+        <CardHeader><CardTitle className="text-base">Appearance</CardTitle></CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? <Moon className="h-5 w-5 text-muted-foreground" /> : <Sun className="h-5 w-5 text-muted-foreground" />}
+              <div>
+                <p className="text-sm font-medium text-foreground">Dark Mode</p>
+                <p className="text-xs text-muted-foreground">Switch between light and dark themes.</p>
+              </div>
+            </div>
+            <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+          </div>
         </CardContent>
       </Card>
 

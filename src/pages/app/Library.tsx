@@ -4,14 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle,
-} from '@/components/ui/sheet';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen, Layers, FileText, Calendar, HardDrive, Tag, Copy } from 'lucide-react';
+import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import MediaDetailSheet from '@/components/MediaDetailSheet';
 
 export default function Library() {
   const { media, folders, collections, addShareLink, shareLinks } = useApp();

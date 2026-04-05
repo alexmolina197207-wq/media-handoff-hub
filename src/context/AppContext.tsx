@@ -27,6 +27,9 @@ interface AppState {
   bulkMoveToFolder: (ids: string[], folderId: string | null) => void;
   deleteFolder: (id: string) => void;
   deleteCollection: (id: string) => void;
+  twoFactorEnabled: boolean;
+  twoFactorMethod: string | null;
+  setTwoFactor: (enabled: boolean, method: string | null) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -111,6 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       shareLinks, storage, activity: demoActivity,
       isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, addShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
+      twoFactorEnabled, twoFactorMethod, setTwoFactor,
     }}>
       {children}
     </AppContext.Provider>

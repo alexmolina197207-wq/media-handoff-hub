@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { AlertTriangle, Moon, Sun, Trash2 } from 'lucide-react';
 import SecuritySettings from '@/components/SecuritySettings';
 import NotificationPreferences from '@/components/NotificationPreferences';
+import DataExport from '@/components/DataExport';
 
 export default function AppSettings() {
   const { user, upgradeUser, setAuthenticated } = useApp();
@@ -73,6 +74,8 @@ export default function AppSettings() {
       <SecuritySettings />
 
       <NotificationPreferences />
+
+      <DataExport />
 
       <Card className="shadow-card border-border">
         <CardHeader>

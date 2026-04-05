@@ -208,7 +208,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <span className="font-bold text-[10px]" style={{color:'white'}}>DR</span>
               </div>
             </div>
-            <h2 className="font-semibold text-foreground text-sm ml-2 md:ml-0">DropRelay Dashboard</h2>
+            <h2 className="font-semibold text-foreground text-sm ml-2 md:ml-0">AnyRelay Dashboard</h2>
             <div className="ml-auto flex items-center gap-1">
               <NotificationCenter />
               <ThemeToggle />

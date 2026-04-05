@@ -21,6 +21,7 @@ interface AppState {
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;
   addCollection: (c: Collection) => void;
+  deleteMedia: (id: string) => void;
   deleteFolder: (id: string) => void;
   deleteCollection: (id: string) => void;
 }
@@ -43,6 +44,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateMedia = (id: string, updates: Partial<MediaFile>) => {
     setMedia(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  };
+
+  const deleteMedia = (id: string) => {
+    const file = media.find(m => m.id === id);
+    setMedia(prev => prev.filter(m => m.id !== id));
+    setShareLinks(prev => prev.filter(s => s.mediaId !== id));
+    if (file) {
+      setStorage(prev => ({ ...prev, fileCount: prev.fileCount - 1, used: prev.used - file.size }));
+    }
   };
 
   const addShareLink = (s: ShareLink) => {
@@ -80,7 +90,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
-      isAuthenticated, setAuthenticated, addMedia, updateMedia, addShareLink, upgradeUser,
+      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, addShareLink, upgradeUser,
       addFolder, reorderFolders, addCollection, deleteFolder, deleteCollection,
     }}>
       {children}

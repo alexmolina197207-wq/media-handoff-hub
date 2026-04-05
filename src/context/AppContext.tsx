@@ -64,6 +64,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setTwoFactor = (enabled: boolean, method: string | null) => {
     setTwoFactorEnabled(enabled);
     setTwoFactorMethod(method);
+    addNotification({
+      type: 'security',
+      title: enabled ? '2FA enabled' : '2FA disabled',
+      message: enabled
+        ? `Two-factor authentication was enabled using ${method || 'an authenticator'}.`
+        : 'Two-factor authentication was disabled on your account.',
+    });
     try {
       if (enabled) {
         localStorage.setItem('dr_2fa_enabled', 'true');

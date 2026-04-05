@@ -80,9 +80,21 @@ function VideoPlayer({ src, poster }: { src: string; poster: string }) {
         poster={poster}
         className="w-full aspect-video object-cover bg-background cursor-pointer"
         onClick={togglePlay}
-        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime ?? 0)}
-        onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 0)}
+        onTimeUpdate={() => {
+          const v = videoRef.current;
+          if (v) {
+            setCurrentTime(v.currentTime);
+            if (v.duration && !isNaN(v.duration) && v.duration !== duration) {
+              setDuration(v.duration);
+            }
+          }
+        }}
+        onLoadedMetadata={() => {
+          const d = videoRef.current?.duration;
+          if (d && !isNaN(d)) setDuration(d);
+        }}
         onEnded={() => setPlaying(false)}
+        preload="metadata"
         playsInline
       />
 

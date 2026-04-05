@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import {
   Upload, Image, Video, X, RotateCcw, AlertTriangle, CheckCircle2,
-  FileWarning, Trash2, Ban, FolderOpen, Layers,
+  FileWarning, Trash2, Ban, FolderOpen, Layers, Tag, Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { formatBytes } from '@/data/mockData';
 
@@ -41,7 +42,7 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, folders, collections, addMedia } = useApp();
+  const { media, folders, collections, addMedia, tagPresets } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,6 +51,8 @@ export default function UploadPage() {
   const [selectedCollection, setSelectedCollection] = useState<string>('none');
   const abortRefs = useRef<Map<string, () => void>>(new Map());
   const dragCounter = useRef(0);
+  const [uploadTags, setUploadTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   // --- Validation ---
   const validateFile = useCallback((file: File): { ok: boolean; error?: string } => {
@@ -138,7 +141,7 @@ export default function UploadPage() {
             id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             title: q.name,
             type: q.mediaType,
-            tags: [],
+            tags: [...uploadTags],
             size: q.size,
             folderId: selectedFolder !== 'none' ? selectedFolder : null,
             collectionId: selectedCollection !== 'none' ? selectedCollection : null,
@@ -331,7 +334,97 @@ export default function UploadPage() {
         </Card>
       )}
 
-      {/* Queue header */}
+      {/* Tags for upload */}
+      {queue.length > 0 && (
+        <Card className="border-border">
+          <CardContent className="p-4 space-y-3">
+            <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+              <Tag className="h-3.5 w-3.5" /> Tags for uploaded files
+            </Label>
+
+            {/* Manual tag input */}
+            <div className="flex gap-1.5">
+              <Input
+                placeholder="Add a tag…"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const t = tagInput.trim().toLowerCase();
+                    if (t && !uploadTags.includes(t)) setUploadTags(prev => [...prev, t]);
+                    setTagInput('');
+                  }
+                }}
+                className="h-8 text-sm"
+              />
+              <Button
+                size="sm"
+                className="h-8"
+                disabled={!tagInput.trim()}
+                onClick={() => {
+                  const t = tagInput.trim().toLowerCase();
+                  if (t && !uploadTags.includes(t)) setUploadTags(prev => [...prev, t]);
+                  setTagInput('');
+                }}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            {/* Current tags */}
+            {uploadTags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {uploadTags.map(tag => (
+                  <Badge key={tag} variant="secondary" className="text-xs gap-1 pr-1">
+                    {tag}
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => setUploadTags(prev => prev.filter(t => t !== tag))}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Quick-apply presets */}
+            {tagPresets.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-muted-foreground font-medium">Quick add from presets</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {tagPresets.map(preset => {
+                    const allApplied = preset.tags.every(t => uploadTags.includes(t));
+                    return (
+                      <Button
+                        key={preset.id}
+                        size="sm"
+                        variant={allApplied ? 'default' : 'outline'}
+                        className="h-7 text-xs px-2.5"
+                        onClick={() => {
+                          if (allApplied) {
+                            setUploadTags(prev => prev.filter(t => !preset.tags.includes(t)));
+                          } else {
+                            setUploadTags(prev => [...new Set([...prev, ...preset.tags])]);
+                          }
+                        }}
+                      >
+                        {preset.name}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {uploadTags.length > 0 && (
+              <p className="text-[10px] text-muted-foreground">
+                {uploadTags.length} tag{uploadTags.length > 1 ? 's' : ''} will be applied to all uploaded files
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {queue.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-foreground">

@@ -119,6 +119,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMedia(prev => prev.map(m => ids.includes(m.id) ? { ...m, folderId } : m));
   };
 
+  const bulkAddTags = (ids: string[], tags: string[]) => {
+    setMedia(prev => prev.map(m => ids.includes(m.id)
+      ? { ...m, tags: [...new Set([...m.tags, ...tags])] }
+      : m
+    ));
+  };
+
+  const bulkRemoveTags = (ids: string[], tags: string[]) => {
+    setMedia(prev => prev.map(m => ids.includes(m.id)
+      ? { ...m, tags: m.tags.filter(t => !tags.includes(t)) }
+      : m
+    ));
+  };
+
   const addShareLink = (s: ShareLink) => {
     setShareLinks(prev => [s, ...prev]);
     const file = media.find(m => m.id === s.mediaId);

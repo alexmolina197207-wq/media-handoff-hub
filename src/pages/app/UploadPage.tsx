@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import {
   Upload, Image, Video, X, RotateCcw, AlertTriangle, CheckCircle2,
-  FileWarning, Trash2, Ban,
+  FileWarning, Trash2, Ban, FolderOpen, Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -39,11 +41,13 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, addMedia } = useApp();
+  const { media, folders, collections, addMedia } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string>('none');
+  const [selectedCollection, setSelectedCollection] = useState<string>('none');
   const abortRefs = useRef<Map<string, () => void>>(new Map());
   const dragCounter = useRef(0);
 
@@ -136,8 +140,8 @@ export default function UploadPage() {
             type: q.mediaType,
             tags: [],
             size: q.size,
-            folderId: null,
-            collectionId: null,
+            folderId: selectedFolder !== 'none' ? selectedFolder : null,
+            collectionId: selectedCollection !== 'none' ? selectedCollection : null,
             previewUrl: q.previewUrl || `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`,
             notes: '',
             uploadedAt: new Date().toISOString(),
@@ -276,6 +280,56 @@ export default function UploadPage() {
         className="hidden"
         onChange={handleInputChange}
       />
+
+      {/* Folder & Collection picker */}
+      {queue.length > 0 && (
+        <Card className="border-border">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                  <FolderOpen className="h-3.5 w-3.5" /> Upload to folder
+                </Label>
+                <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="No folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No folder</SelectItem>
+                    {folders.map(f => (
+                      <SelectItem key={f.id} value={f.id}>{f.icon} {f.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                  <Layers className="h-3.5 w-3.5" /> Collection
+                </Label>
+                <Select value={selectedCollection} onValueChange={setSelectedCollection}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="No collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No collection</SelectItem>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {(selectedFolder !== 'none' || selectedCollection !== 'none') && (
+              <p className="text-xs text-muted-foreground mt-2">
+                All uploaded files will be added to{' '}
+                {selectedFolder !== 'none' && <Badge variant="secondary" className="text-[10px] mx-0.5">{folders.find(f => f.id === selectedFolder)?.icon} {folders.find(f => f.id === selectedFolder)?.name}</Badge>}
+                {selectedFolder !== 'none' && selectedCollection !== 'none' && ' and '}
+                {selectedCollection !== 'none' && <Badge variant="secondary" className="text-[10px] mx-0.5">{collections.find(c => c.id === selectedCollection)?.name}</Badge>}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Queue header */}
       {queue.length > 0 && (

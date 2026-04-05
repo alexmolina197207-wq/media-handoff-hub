@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import MediaDetailSheet from '@/components/MediaDetailSheet';
 
 export default function Library() {
-  const { media, folders, collections, addShareLink, shareLinks } = useApp();
+  const { media, folders, addShareLink } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('tag') || '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -34,12 +34,7 @@ export default function Library() {
     return matchSearch && matchType;
   });
 
-  const filtered = media.filter(m => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || m.title.toLowerCase().includes(q) || m.tags.some(t => t.includes(q));
-    const matchType = typeFilter === 'all' || m.type === typeFilter;
-    return matchSearch && matchType;
-  });
+  const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const slug = `share-${Date.now().toString(36)}`;
     addShareLink({
@@ -52,11 +47,6 @@ export default function Library() {
       active: true,
     });
     toast.success('Share link created!', { description: `droprelay.app/${slug}` });
-  };
-
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`https://droprelay.app/s/${slug}`);
-    toast.success('Link copied!');
   };
 
   return (

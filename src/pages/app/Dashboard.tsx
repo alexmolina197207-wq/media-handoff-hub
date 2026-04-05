@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes, formatDate } from '@/data/mockData';
 import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { media, storage, activity, folders, collections, shareLinks } = useApp();
@@ -27,18 +27,16 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {stats.map(s => (
-          <Card
-            key={s.label}
-            className="shadow-card border-border cursor-pointer transition-all duration-150 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm"
-            onClick={() => navigate(s.route)}
-          >
-            <CardContent className="p-3 md:p-4 text-center relative">
-              <s.icon className={`h-5 w-5 mx-auto mb-1.5 ${s.color}`} />
-              <p className="text-xl md:text-2xl font-bold text-foreground">{s.value}</p>
-              <p className="text-[11px] text-muted-foreground">{s.label}</p>
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 absolute top-2 right-2" />
-            </CardContent>
-          </Card>
+          <Link key={s.label} to={s.route} className="block">
+            <Card className="shadow-card border-border transition-all duration-100 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm h-full">
+              <CardContent className="p-3 md:p-4 text-center relative">
+                <s.icon className={`h-5 w-5 mx-auto mb-1.5 ${s.color}`} />
+                <p className="text-xl md:text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 absolute top-2 right-2" />
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
@@ -47,14 +45,14 @@ export default function Dashboard() {
           <CardHeader><CardTitle className="text-base">Recent Uploads</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {media.slice(0, 5).map(m => (
-              <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => navigate('/app/library')}>
+              <Link key={m.id} to="/app/library" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 active:bg-muted transition-colors">
                 <img src={m.previewUrl} alt={m.title} className="w-10 h-10 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
                   <p className="text-xs text-muted-foreground">{formatDate(m.uploadedAt)} · {formatBytes(m.size)}</p>
                 </div>
                 <Badge variant="secondary" className="text-xs shrink-0">{m.type}</Badge>
-              </div>
+              </Link>
             ))}
           </CardContent>
         </Card>
@@ -64,7 +62,11 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-6">
               {activity.topTags.map(tag => (
-                <Badge key={tag} variant="secondary" className="text-sm">{tag}</Badge>
+                <Link key={tag} to={`/app/library?tag=${encodeURIComponent(tag)}`}>
+                  <Badge variant="secondary" className="text-sm cursor-pointer hover:bg-primary/10 active:scale-95 transition-all">
+                    #{tag}
+                  </Badge>
+                </Link>
               ))}
             </div>
             <div>

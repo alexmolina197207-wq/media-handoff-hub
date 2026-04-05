@@ -1,0 +1,72 @@
+import { useApp } from '@/context/AppContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { AlertTriangle } from 'lucide-react';
+
+export default function AppSettings() {
+  const { user, upgradeUser } = useApp();
+
+  return (
+    <div className="max-w-2xl space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-muted-foreground text-sm">Manage your account and preferences.</p>
+      </div>
+
+      <Card className="shadow-card border-border">
+        <CardHeader><CardTitle className="text-base">Profile</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input defaultValue={user.name} />
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input defaultValue={user.email} />
+          </div>
+          <Button onClick={() => toast.success('Profile saved (demo)')}>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Billing & Plan</CardTitle>
+            <Badge variant="secondary" className="capitalize">{user.plan} plan</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {user.plan === 'free' ? (
+            <>
+              <p className="text-sm text-muted-foreground">You're on the free plan with 500 MB storage and basic features.</p>
+              <div className="flex gap-3">
+                <Button onClick={() => { upgradeUser(); toast.success('🎉 Upgraded to Pro!'); }}>Upgrade to Pro — $12/mo</Button>
+                <Button variant="outline" onClick={() => toast.info('Team plan — contact sales (demo)')}>Team Plan</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">You're on the <strong>Pro</strong> plan with 5 GB storage and full features.</p>
+              <Button variant="outline" onClick={() => toast.info('Billing portal would open here (demo)')}>Manage Billing</Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card border-border bg-muted/30">
+        <CardContent className="p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Demo Environment</p>
+            <p className="text-xs text-muted-foreground">This is a simulated DropRelay instance. No real data is stored, no payments are processed, and all media is mock content. Everything resets on page reload.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

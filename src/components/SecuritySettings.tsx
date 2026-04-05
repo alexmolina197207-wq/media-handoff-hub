@@ -2,15 +2,22 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Shield, ShieldCheck, ShieldOff, Smartphone, Mail, MessageSquare,
   Monitor, Laptop, TabletSmartphone, LogOut, MapPin, Clock, ChevronDown, ChevronUp,
+  Key, CheckCircle2, AlertTriangle, Eye, EyeOff, ShieldAlert, Fingerprint,
 } from 'lucide-react';
 import TwoFactorSetup from './TwoFactorSetup';
 import { useApp } from '@/context/AppContext';
@@ -70,13 +77,33 @@ const MOCK_ACTIVITY: ActivityEntry[] = [
 ];
 
 export default function SecuritySettings() {
-  const { twoFactorEnabled, twoFactorMethod, setTwoFactor } = useApp();
+  const { twoFactorEnabled, twoFactorMethod, setTwoFactor, user } = useApp();
   const [setupOpen, setSetupOpen] = useState(false);
   const [disableOpen, setDisableOpen] = useState(false);
   const [sessions, setSessions] = useState<Session[]>(MOCK_SESSIONS);
   const [revokeTarget, setRevokeTarget] = useState<Session | null>(null);
   const [revokeAllOpen, setRevokeAllOpen] = useState(false);
   const [activityExpanded, setActivityExpanded] = useState(false);
+
+  // Change password state
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [passwordLastChanged, setPasswordLastChanged] = useState<string | null>(null);
+
+  // Email verification
+  const [emailVerified, setEmailVerified] = useState(true);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  // Trusted device
+  const [trustedDevice, setTrustedDevice] = useState(false);
+
+  // Suspicious login warning
+  const [suspiciousWarning, setSuspiciousWarning] = useState(true);
+  const suspiciousLogin = MOCK_ACTIVITY.find(a => !a.success && a.location !== 'San Francisco, CA');
 
   const handleEnable = (method: string) => {
     setTwoFactor(true, method);
@@ -102,12 +129,107 @@ export default function SecuritySettings() {
     toast.success('Signed out of all other devices');
   };
 
+  const handleChangePassword = () => {
+    if (newPw.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    if (newPw !== confirmPw) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setPasswordLastChanged('Just now');
+    setChangePasswordOpen(false);
+    setCurrentPw('');
+    setNewPw('');
+    setConfirmPw('');
+    toast.success('Password changed successfully');
+  };
+
+  const handleResendVerification = () => {
+    setVerificationSent(true);
+    toast.success(`Verification email sent to ${user.email}`);
+    setTimeout(() => setVerificationSent(false), 30000);
+  };
+
   const methodInfo = twoFactorMethod ? METHOD_LABELS[twoFactorMethod] : null;
   const otherSessions = sessions.filter(s => !s.current);
   const visibleActivity = activityExpanded ? MOCK_ACTIVITY : MOCK_ACTIVITY.slice(0, 3);
 
+  const pwStrength = newPw.length === 0 ? null : newPw.length < 8 ? 'weak' : newPw.length < 12 ? 'fair' : 'strong';
+  const pwStrengthColor = pwStrength === 'weak' ? 'bg-destructive' : pwStrength === 'fair' ? 'bg-accent' : 'bg-primary';
+
   return (
     <>
+      {/* Suspicious Login Warning */}
+      {suspiciousLogin && suspiciousWarning && (
+        <Card className="shadow-card border-destructive/40 border bg-destructive/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                <ShieldAlert className="h-5 w-5 text-destructive" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-destructive">Suspicious login attempt detected</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  A failed sign-in from <strong className="text-foreground">{suspiciousLogin.location}</strong> ({suspiciousLogin.ip}) was blocked on {suspiciousLogin.timestamp}.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  If this wasn't you, we recommend changing your password and enabling 2FA.
+                </p>
+                <div className="flex items-center gap-2 mt-3">
+                  <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10 h-7 text-xs" onClick={() => setChangePasswordOpen(true)}>
+                    <Key className="h-3 w-3 mr-1" />
+                    Change Password
+                  </Button>
+                  {!twoFactorEnabled && (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSetupOpen(true)}>
+                      <Shield className="h-3 w-3 mr-1" />
+                      Enable 2FA
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground ml-auto" onClick={() => setSuspiciousWarning(false)}>
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Email Verification */}
+      <Card className="shadow-card border-border">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${emailVerified ? 'bg-accent/10 text-accent' : 'bg-destructive/10 text-destructive'}`}>
+                {emailVerified ? <CheckCircle2 className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground">Email Verification</p>
+                  <Badge variant={emailVerified ? 'default' : 'destructive'} className={`text-[10px] px-1.5 py-0 ${emailVerified ? 'bg-accent text-accent-foreground' : ''}`}>
+                    {emailVerified ? 'Verified' : 'Unverified'}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{user.email}</p>
+              </div>
+            </div>
+            {!emailVerified && (
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleResendVerification} disabled={verificationSent}>
+                {verificationSent ? 'Sent ✓' : 'Resend'}
+              </Button>
+            )}
+            {emailVerified && (
+              <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => { setEmailVerified(false); toast.info('Email marked as unverified (demo)'); }}>
+                Test unverified
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Two-Factor Authentication */}
       <Card className="shadow-card border-border">
         <CardHeader>
@@ -145,6 +267,25 @@ export default function SecuritySettings() {
                   </p>
                 </div>
               </div>
+
+              {/* Trusted Device */}
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div className="flex items-center gap-3">
+                  <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Remember this device</p>
+                    <p className="text-xs text-muted-foreground">Skip 2FA on this device for 30 days</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={trustedDevice}
+                  onCheckedChange={(checked) => {
+                    setTrustedDevice(checked);
+                    toast.success(checked ? 'This device is now trusted for 30 days' : 'Device trust removed — 2FA required on next sign-in');
+                  }}
+                />
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -164,12 +305,18 @@ export default function SecuritySettings() {
 
           <Separator />
 
+          {/* Password */}
           <div>
             <p className="text-sm font-medium text-foreground">Password</p>
-            <p className="text-xs text-muted-foreground mt-1">Last changed: Never (demo)</p>
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.info('Password change flow (demo)')}>
-              Change Password
-            </Button>
+            <p className="text-xs text-muted-foreground mt-1">
+              Last changed: {passwordLastChanged || 'Never'}
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <Button variant="outline" size="sm" onClick={() => setChangePasswordOpen(true)}>
+                <Key className="h-4 w-4 mr-2" />
+                Change Password
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -300,6 +447,103 @@ export default function SecuritySettings() {
 
       {/* Dialogs */}
       <TwoFactorSetup open={setupOpen} onOpenChange={setSetupOpen} onComplete={handleEnable} />
+
+      {/* Change Password Dialog */}
+      <Dialog open={changePasswordOpen} onOpenChange={(v) => { setChangePasswordOpen(v); if (!v) { setCurrentPw(''); setNewPw(''); setConfirmPw(''); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new one. Use at least 8 characters with a mix of letters, numbers, and symbols.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="current-pw">Current Password</Label>
+              <div className="relative">
+                <Input
+                  id="current-pw"
+                  type={showCurrentPw ? 'text' : 'password'}
+                  value={currentPw}
+                  onChange={e => setCurrentPw(e.target.value)}
+                  placeholder="Enter current password"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowCurrentPw(!showCurrentPw)}
+                >
+                  {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-pw">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="new-pw"
+                  type={showNewPw ? 'text' : 'password'}
+                  value={newPw}
+                  onChange={e => setNewPw(e.target.value)}
+                  placeholder="At least 8 characters"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowNewPw(!showNewPw)}
+                >
+                  {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              {pwStrength && (
+                <div className="space-y-1">
+                  <div className="flex gap-1">
+                    {['weak', 'fair', 'strong'].map((level, i) => (
+                      <div
+                        key={level}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          (pwStrength === 'weak' && i === 0) || (pwStrength === 'fair' && i <= 1) || (pwStrength === 'strong')
+                            ? pwStrengthColor
+                            : 'bg-muted'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className={`text-[11px] capitalize ${pwStrength === 'weak' ? 'text-destructive' : pwStrength === 'fair' ? 'text-accent' : 'text-primary'}`}>
+                    {pwStrength} password
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-pw">Confirm New Password</Label>
+              <Input
+                id="confirm-pw"
+                type="password"
+                value={confirmPw}
+                onChange={e => setConfirmPw(e.target.value)}
+                placeholder="Re-enter new password"
+              />
+              {confirmPw && newPw !== confirmPw && (
+                <p className="text-[11px] text-destructive">Passwords do not match</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangePasswordOpen(false)}>Cancel</Button>
+            <Button onClick={handleChangePassword} disabled={!currentPw || newPw.length < 8 || newPw !== confirmPw}>
+              Update Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={disableOpen} onOpenChange={setDisableOpen}>
         <AlertDialogContent>

@@ -206,8 +206,27 @@ export default function Library() {
     toast.success('Share link created!', { description: `droprelay.app/${slug}` });
   };
 
+  const handleRefresh = useCallback(async () => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    toast.success('Library refreshed');
+  }, []);
+
+  const { containerRef, pullDistance, refreshing } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div ref={containerRef} className="space-y-4 animate-fade-in relative overflow-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Pull-to-refresh indicator */}
+      <div
+        className="flex items-center justify-center overflow-hidden transition-all duration-200 ease-out"
+        style={{ height: pullDistance > 0 ? `${pullDistance}px` : '0px' }}
+      >
+        <RefreshCw
+          className={`h-5 w-5 text-primary transition-transform duration-200 ${refreshing ? 'animate-spin' : ''}`}
+          style={{ transform: `rotate(${Math.min(pullDistance * 3, 360)}deg)`, opacity: Math.min(pullDistance / 60, 1) }}
+        />
+      </div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>

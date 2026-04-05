@@ -116,14 +116,32 @@ export default function UploadPage() {
     toast.success(`Applied ${bulkTags.length} tag${bulkTags.length > 1 ? 's' : ''} to all files`);
   }, [bulkTags]);
 
-  // When applyToAll is on, sync bulk tag changes to pending files automatically
+  // When applyToAll is on, sync bulk tag changes (additions AND removals) to pending files
   useEffect(() => {
-    if (!applyToAll) return;
+    if (!applyToAll) {
+      prevBulkTagsRef.current = bulkTags;
+      return;
+    }
+    const prevTags = prevBulkTagsRef.current;
+    const added = bulkTags.filter(t => !prevTags.includes(t));
+    const removed = prevTags.filter(t => !bulkTags.includes(t));
+    prevBulkTagsRef.current = bulkTags;
+
+    if (added.length === 0 && removed.length === 0) return;
+
     setQueue(prev => prev.map(q => {
       if (q.status === 'complete' || q.status === 'error' || q.status === 'cancelled') return q;
-      const merged = [...new Set([...q.tags, ...bulkTags])];
-      if (merged.length === q.tags.length && merged.every(t => q.tags.includes(t))) return q;
-      return { ...q, tags: merged };
+      let newTags = [...q.tags];
+      // Add new bulk tags (deduplicated)
+      for (const t of added) {
+        if (!newTags.includes(t)) newTags.push(t);
+      }
+      // Remove bulk tags that were removed
+      if (removed.length > 0) {
+        newTags = newTags.filter(t => !removed.includes(t));
+      }
+      if (newTags.length === q.tags.length && newTags.every((t, i) => q.tags[i] === t)) return q;
+      return { ...q, tags: newTags };
     }));
   }, [bulkTags, applyToAll]);
 

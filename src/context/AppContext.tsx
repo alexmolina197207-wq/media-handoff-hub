@@ -27,6 +27,9 @@ interface AppState {
   bulkMoveToFolder: (ids: string[], folderId: string | null) => void;
   deleteFolder: (id: string) => void;
   deleteCollection: (id: string) => void;
+  twoFactorEnabled: boolean;
+  twoFactorMethod: string | null;
+  setTwoFactor: (enabled: boolean, method: string | null) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -39,6 +42,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<Collection[]>(demoCollections);
   const [shareLinks, setShareLinks] = useState<ShareLink[]>(demoShareLinks);
   const [storage, setStorage] = useState<StorageSummary>(demoStorage);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
+
+  const setTwoFactor = (enabled: boolean, method: string | null) => {
+    setTwoFactorEnabled(enabled);
+    setTwoFactorMethod(method);
+  };
 
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);
@@ -111,6 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       shareLinks, storage, activity: demoActivity,
       isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, addShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
+      twoFactorEnabled, twoFactorMethod, setTwoFactor,
     }}>
       {children}
     </AppContext.Provider>

@@ -5,19 +5,40 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import LoginTwoFactor from '@/components/LoginTwoFactor';
 
 export default function Login() {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState('alex@droprelay.demo');
   const [password, setPassword] = useState('');
-  const { setAuthenticated } = useApp();
+  const [show2FA, setShow2FA] = useState(false);
+  const { setAuthenticated, twoFactorEnabled, twoFactorMethod } = useApp();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (twoFactorEnabled && !isSignup) {
+      setShow2FA(true);
+    } else {
+      setAuthenticated(true);
+      navigate('/app');
+    }
+  };
+
+  const handleTwoFactorVerify = () => {
     setAuthenticated(true);
     navigate('/app');
   };
+
+  if (show2FA) {
+    return (
+      <LoginTwoFactor
+        method={twoFactorMethod || 'authenticator'}
+        onVerify={handleTwoFactorVerify}
+        onBack={() => setShow2FA(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

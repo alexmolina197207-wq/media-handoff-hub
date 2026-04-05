@@ -156,7 +156,7 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
                     onClick={() => { setEditingId(preset.id); setCreating(false); }}
                   >
                     <Pencil className="h-3 w-3" />
@@ -164,7 +164,7 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                     onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
                   >
                     <Trash2 className="h-3 w-3" />

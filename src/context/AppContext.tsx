@@ -15,6 +15,7 @@ interface AppState {
   isAuthenticated: boolean;
   setAuthenticated: (v: boolean) => void;
   addMedia: (m: MediaFile) => void;
+  updateMedia: (id: string, updates: Partial<MediaFile>) => void;
   addShareLink: (s: ShareLink) => void;
   upgradeUser: () => void;
   addFolder: (f: Folder) => void;

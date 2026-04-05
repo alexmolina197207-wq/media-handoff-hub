@@ -266,6 +266,37 @@ export default function Library() {
           </Button>
         </div>
         <div className="flex items-center gap-1 ml-auto">
+          {/* Sort */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                {sortDir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline capitalize">{sortField}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-44 p-1.5" align="end">
+              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Sort by</p>
+              {([
+                ['date', 'Date uploaded'],
+                ['name', 'Name'],
+                ['size', 'File size'],
+                ['type', 'Type'],
+              ] as [SortField, string][]).map(([field, label]) => (
+                <button
+                  key={field}
+                  className={`w-full flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
+                    sortField === field ? 'bg-primary/10 text-primary font-medium' : 'text-foreground hover:bg-muted'
+                  }`}
+                  onClick={() => toggleSort(field)}
+                >
+                  {label}
+                  {sortField === field && (
+                    sortDir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
           <Button variant={view === 'grid' ? 'default' : 'ghost'} size="icon" onClick={() => setView('grid')}><Grid3X3 className="h-4 w-4" /></Button>
           <Button variant={view === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setView('list')}><List className="h-4 w-4" /></Button>
         </div>

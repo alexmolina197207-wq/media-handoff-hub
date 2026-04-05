@@ -18,6 +18,7 @@ interface AppState {
   addMedia: (m: MediaFile) => void;
   updateMedia: (id: string, updates: Partial<MediaFile>) => void;
   addShareLink: (s: ShareLink) => void;
+  updateShareLink: (id: string, updates: Partial<ShareLink>) => void;
   upgradeUser: () => void;
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;
@@ -143,6 +144,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateShareLink = (id: string, updates: Partial<ShareLink>) => {
+    setShareLinks(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
   const upgradeUser = () => {
     setUser(prev => ({ ...prev, plan: 'pro' }));
     setStorage(prev => ({ ...prev, limit: 5_000_000_000 }));
@@ -178,7 +183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
-      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, upgradeUser,
+      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
     }}>

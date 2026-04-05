@@ -4,19 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, CheckCircle2, X, Clock, Trash2 } from 'lucide-react';
+import { Bell, CheckCircle2, X, Clock, Trash2, Upload, Link2, Shield, Inbox } from 'lucide-react';
 import { useNotifications, type AppNotification, type NotificationType } from '@/context/NotificationContext';
 
-const TYPE_COLORS: Record<NotificationType, string> = {
-  security: 'text-primary',
-  upload: 'text-accent',
-  share: 'text-primary',
-};
-
-const TYPE_BG: Record<NotificationType, string> = {
-  security: 'bg-primary/10',
-  upload: 'bg-accent/10',
-  share: 'bg-primary/10',
+const TYPE_STYLES: Record<NotificationType, { bg: string; text: string; label: string }> = {
+  security: { bg: 'bg-amber-500/10', text: 'text-amber-500', label: 'Security' },
+  upload: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', label: 'Upload' },
+  share: { bg: 'bg-blue-500/10', text: 'text-blue-500', label: 'Share' },
 };
 
 export default function NotificationCenter() {
@@ -58,9 +52,7 @@ export default function NotificationCenter() {
         <Tabs defaultValue="all" className="w-full">
           <div className="px-4 pt-2">
             <TabsList className="w-full h-8">
-              <TabsTrigger value="all" className="text-xs flex-1">
-                All {notifications.length > 0 && <span className="ml-1 text-muted-foreground">({notifications.length})</span>}
-              </TabsTrigger>
+              <TabsTrigger value="all" className="text-xs flex-1">All</TabsTrigger>
               <TabsTrigger value="security" className="text-xs flex-1">Security</TabsTrigger>
               <TabsTrigger value="upload" className="text-xs flex-1">Uploads</TabsTrigger>
               <TabsTrigger value="share" className="text-xs flex-1">Shares</TabsTrigger>
@@ -77,7 +69,7 @@ export default function NotificationCenter() {
         {notifications.length > 0 && (
           <div className="border-t border-border px-4 py-2">
             <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground h-7" onClick={clearAll}>
-              <Trash2 className="h-3 w-3 mr-1" /> Clear all notifications
+              <Trash2 className="h-3 w-3 mr-1" /> Clear all
             </Button>
           </div>
         )}
@@ -93,10 +85,12 @@ function NotificationList({ notifications, onRead, onDismiss }: {
 }) {
   if (notifications.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-        <Bell className="h-8 w-8 text-muted-foreground/30 mb-2" />
-        <p className="text-sm text-muted-foreground">No notifications</p>
-        <p className="text-xs text-muted-foreground/70">You're all caught up!</p>
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+          <Inbox className="h-6 w-6 text-muted-foreground/40" />
+        </div>
+        <p className="text-sm font-medium text-foreground">All caught up!</p>
+        <p className="text-xs text-muted-foreground mt-1">No notifications to show right now.</p>
       </div>
     );
   }
@@ -104,34 +98,42 @@ function NotificationList({ notifications, onRead, onDismiss }: {
   return (
     <ScrollArea className="max-h-[360px]">
       <div className="divide-y divide-border">
-        {notifications.map(notif => (
-          <div
-            key={notif.id}
-            className={`flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer group ${!notif.read ? 'bg-primary/[0.03]' : ''}`}
-            onClick={() => onRead(notif.id)}
-          >
-            <div className={`h-8 w-8 rounded-lg ${TYPE_BG[notif.type]} ${TYPE_COLORS[notif.type]} flex items-center justify-center shrink-0 mt-0.5`}>
-              {notif.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className={`text-sm font-medium truncate ${!notif.read ? 'text-foreground' : 'text-muted-foreground'}`}>{notif.title}</p>
-                {!notif.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.message}</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-1 flex items-center gap-1">
-                <Clock className="h-3 w-3" /> {notif.timestamp}
-              </p>
-            </div>
-            <Button
-              variant="ghost" size="icon"
-              className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-              onClick={(e) => { e.stopPropagation(); onDismiss(notif.id); }}
+        {notifications.map(notif => {
+          const style = TYPE_STYLES[notif.type];
+          return (
+            <div
+              key={notif.id}
+              className={`flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer group ${!notif.read ? 'bg-primary/[0.03]' : ''}`}
+              onClick={() => onRead(notif.id)}
             >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        ))}
+              <div className={`h-8 w-8 rounded-lg ${style.bg} ${style.text} flex items-center justify-center shrink-0 mt-0.5`}>
+                {notif.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className={`text-sm font-medium truncate ${!notif.read ? 'text-foreground' : 'text-muted-foreground'}`}>{notif.title}</p>
+                  {!notif.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.message}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className={`text-[9px] px-1 py-0 ${style.text} border-current/20`}>
+                    {style.label}
+                  </Badge>
+                  <span className="text-[11px] text-muted-foreground/60 flex items-center gap-0.5">
+                    <Clock className="h-2.5 w-2.5" /> {notif.timestamp}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="ghost" size="icon"
+                className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                onClick={(e) => { e.stopPropagation(); onDismiss(notif.id); }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        })}
       </div>
     </ScrollArea>
   );

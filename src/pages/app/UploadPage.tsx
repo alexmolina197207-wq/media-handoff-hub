@@ -37,7 +37,12 @@ interface QueuedFile {
   error?: string;
   previewUrl?: string;
   tags: string[];
+  folderId: string | null;
+  collectionId: string | null;
 }
+
+const normalizeTags = (tags: string[]) => [...new Set(tags.map(tag => tag.trim().toLowerCase()).filter(Boolean))];
+const resolveSelectionValue = (value: string) => value !== 'none' ? value : null;
 
 function fileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
@@ -88,7 +93,9 @@ export default function UploadPage() {
         progress: 0,
         error: validation.ok ? undefined : validation.error,
         previewUrl,
-        tags: [], // start empty — user opts in
+        tags: applyToAll ? normalizeTags(bulkTags) : [],
+        folderId: resolveSelectionValue(selectedFolder),
+        collectionId: resolveSelectionValue(selectedCollection),
       });
     }
 
@@ -104,7 +111,18 @@ export default function UploadPage() {
       }
       return [...prev, ...filtered];
     });
-  }, [validateFile, isDuplicate]);
+  }, [validateFile, isDuplicate, applyToAll, bulkTags, selectedFolder, selectedCollection]);
+
+  useEffect(() => {
+    const folderId = resolveSelectionValue(selectedFolder);
+    const collectionId = resolveSelectionValue(selectedCollection);
+
+    setQueue(prev => prev.map(q => {
+      if (q.status === 'complete' || q.status === 'error' || q.status === 'cancelled') return q;
+      if (q.folderId === folderId && q.collectionId === collectionId) return q;
+      return { ...q, folderId, collectionId };
+    }));
+  }, [selectedFolder, selectedCollection]);
 
   // --- Apply bulk tags to all queued/duplicate files ---
   const applyBulkTagsToAll = useCallback(() => {
@@ -170,23 +188,29 @@ export default function UploadPage() {
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
+        let completedFile: QueuedFile | null = null;
         setQueue(prev => prev.map(q => {
           if (q.id !== id) return q;
+          completedFile = q;
+          return { ...q, status: 'complete', progress: 100 };
+        }));
+
+        if (completedFile) {
           addMedia({
             id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-            title: q.name,
-            type: q.mediaType,
-            tags: [...q.tags], // use THIS file's tags
-            size: q.size,
-            folderId: selectedFolder !== 'none' ? selectedFolder : null,
-            collectionId: selectedCollection !== 'none' ? selectedCollection : null,
-            previewUrl: q.previewUrl || `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`,
+            title: completedFile.name,
+            type: completedFile.mediaType,
+            tags: normalizeTags(completedFile.tags),
+            size: completedFile.size,
+            folderId: completedFile.folderId,
+            collectionId: completedFile.collectionId,
+            previewUrl: completedFile.previewUrl || `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`,
             notes: '',
             uploadedAt: new Date().toISOString(),
             source: 'Upload',
           });
-          return { ...q, status: 'complete', progress: 100 };
-        }));
+        }
+
         abortRefs.current.delete(id);
       } else {
         setQueue(prev => prev.map(q => q.id === id ? { ...q, progress: Math.min(progress, 99) } : q));
@@ -198,7 +222,7 @@ export default function UploadPage() {
       clearInterval(interval);
       setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'cancelled', progress: 0 } : q));
     });
-  }, [addMedia, selectedFolder, selectedCollection]);
+  }, [addMedia]);
 
   // --- Auto-start queued files ---
   useEffect(() => {

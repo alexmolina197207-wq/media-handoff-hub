@@ -71,7 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addNotification({
       type: 'upload',
       title: 'Upload complete',
-      message: `"${m.name}" (${(m.size / 1_000_000).toFixed(1)} MB) was uploaded successfully.`,
+      message: `"${m.title}" (${(m.size / 1_000_000).toFixed(1)} MB) was uploaded successfully.`,
     });
   };
 
@@ -106,7 +106,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addNotification({
       type: 'share',
       title: 'Share link created',
-      message: `A new share link was created for "${file?.name || 'a file'}"${s.expiresAt ? ` expiring ${new Date(s.expiresAt).toLocaleDateString()}` : ''}.`,
+      message: `A new share link was created for "${file?.title || 'a file'}"${s.expiresAt ? ` expiring ${new Date(s.expiresAt).toLocaleDateString()}` : ''}.`,
     });
   };
 

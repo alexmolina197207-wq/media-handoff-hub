@@ -65,7 +65,7 @@ export interface ActivitySummary {
 
 export const demoUser: User = {
   name: 'Alex Rivera',
-  email: 'alex@droprelay.demo',
+  email: 'alex@anyrelay.demo',
   plan: 'free',
 };
 

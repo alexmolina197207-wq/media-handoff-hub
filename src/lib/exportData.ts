@@ -44,7 +44,7 @@ export function exportJSON(data: ExportPayload) {
       return { file: file?.title || 'Unknown', slug: s.slug, access: s.access, clicks: s.clicks, expiresAt: s.expiresAt };
     }),
   };
-  triggerDownload(JSON.stringify(payload, null, 2), 'droprelay-export.json', 'application/json');
+  triggerDownload(JSON.stringify(payload, null, 2), 'anyrelay-export.json', 'application/json');
 }
 
 // ── CSV ──
@@ -90,7 +90,7 @@ export function exportCSV(data: ExportPayload) {
     toCsv(linkHeaders, linkRows),
   ];
 
-  triggerDownload(sections.join('\n'), 'droprelay-export.csv', 'text/csv');
+  triggerDownload(sections.join('\n'), 'anyrelay-export.csv', 'text/csv');
 }
 
 // ── XLSX (HTML table approach for broad compatibility) ──
@@ -135,5 +135,5 @@ export function exportXLSX(data: ExportPayload) {
       ${makeTable('Share Links', linkHeaders, linkRows)}
     </body></html>`;
 
-  triggerDownload(html, 'droprelay-export.xls', 'application/vnd.ms-excel');
+  triggerDownload(html, 'anyrelay-export.xls', 'application/vnd.ms-excel');
 }

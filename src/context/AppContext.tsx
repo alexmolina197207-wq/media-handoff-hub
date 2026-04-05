@@ -144,6 +144,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateShareLink = (id: string, updates: Partial<ShareLink>) => {
+    setShareLinks(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
   const upgradeUser = () => {
     setUser(prev => ({ ...prev, plan: 'pro' }));
     setStorage(prev => ({ ...prev, limit: 5_000_000_000 }));

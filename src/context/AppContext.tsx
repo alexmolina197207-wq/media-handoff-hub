@@ -42,12 +42,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<Collection[]>(demoCollections);
   const [shareLinks, setShareLinks] = useState<ShareLink[]>(demoShareLinks);
   const [storage, setStorage] = useState<StorageSummary>(demoStorage);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(null);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => {
+    try { return localStorage.getItem('dr_2fa_enabled') === 'true'; } catch { return false; }
+  });
+  const [twoFactorMethod, setTwoFactorMethod] = useState<string | null>(() => {
+    try { return localStorage.getItem('dr_2fa_method'); } catch { return null; }
+  });
 
   const setTwoFactor = (enabled: boolean, method: string | null) => {
     setTwoFactorEnabled(enabled);
     setTwoFactorMethod(method);
+    try {
+      if (enabled) {
+        localStorage.setItem('dr_2fa_enabled', 'true');
+        localStorage.setItem('dr_2fa_method', method || '');
+      } else {
+        localStorage.removeItem('dr_2fa_enabled');
+        localStorage.removeItem('dr_2fa_method');
+      }
+    } catch {}
   };
 
   const addMedia = (m: MediaFile) => {

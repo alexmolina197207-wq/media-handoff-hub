@@ -281,6 +281,56 @@ export default function UploadPage() {
         onChange={handleInputChange}
       />
 
+      {/* Folder & Collection picker */}
+      {queue.length > 0 && (
+        <Card className="border-border">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                  <FolderOpen className="h-3.5 w-3.5" /> Upload to folder
+                </Label>
+                <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="No folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No folder</SelectItem>
+                    {folders.map(f => (
+                      <SelectItem key={f.id} value={f.id}>{f.icon} {f.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                  <Layers className="h-3.5 w-3.5" /> Collection
+                </Label>
+                <Select value={selectedCollection} onValueChange={setSelectedCollection}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="No collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No collection</SelectItem>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {(selectedFolder !== 'none' || selectedCollection !== 'none') && (
+              <p className="text-xs text-muted-foreground mt-2">
+                All uploaded files will be added to{' '}
+                {selectedFolder !== 'none' && <Badge variant="secondary" className="text-[10px] mx-0.5">{folders.find(f => f.id === selectedFolder)?.icon} {folders.find(f => f.id === selectedFolder)?.name}</Badge>}
+                {selectedFolder !== 'none' && selectedCollection !== 'none' && ' and '}
+                {selectedCollection !== 'none' && <Badge variant="secondary" className="text-[10px] mx-0.5">{collections.find(c => c.id === selectedCollection)?.name}</Badge>}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Queue header */}
       {queue.length > 0 && (
         <div className="flex items-center justify-between">

@@ -4,17 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle,
-} from '@/components/ui/sheet';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen, Layers, FileText, Calendar, HardDrive, Tag, Copy } from 'lucide-react';
+import { Search, Grid3X3, List, Image, Video, Link2, FolderOpen } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import MediaDetailSheet from '@/components/MediaDetailSheet';
 
 export default function Library() {
-  const { media, folders, collections, addShareLink, shareLinks } = useApp();
+  const { media, folders, addShareLink } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('tag') || '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -37,11 +34,6 @@ export default function Library() {
     return matchSearch && matchType;
   });
 
-  const selected = media.find(m => m.id === selectedId);
-  const selectedFolder = selected ? folders.find(f => f.id === selected.folderId) : undefined;
-  const selectedCollection = selected ? collections.find(c => c.id === selected.collectionId) : undefined;
-  const selectedLinks = selected ? shareLinks.filter(s => s.mediaId === selected.id) : [];
-
   const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const slug = `share-${Date.now().toString(36)}`;
@@ -55,11 +47,6 @@ export default function Library() {
       active: true,
     });
     toast.success('Share link created!', { description: `droprelay.app/${slug}` });
-  };
-
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`https://droprelay.app/s/${slug}`);
-    toast.success('Link copied!');
   };
 
   return (
@@ -177,132 +164,11 @@ export default function Library() {
         </div>
       )}
 
-      {/* Media Detail Sheet */}
-      <Sheet open={!!selectedId} onOpenChange={open => !open && setSelectedId(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          {selected && (
-            <div className="space-y-5">
-              <SheetHeader className="space-y-0">
-                <SheetTitle className="text-lg">{selected.title}</SheetTitle>
-              </SheetHeader>
-
-              <div className="rounded-lg overflow-hidden border border-border">
-                <img src={selected.previewUrl} alt={selected.title} className="w-full aspect-video object-cover" />
-              </div>
-
-              {/* Metadata */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 text-sm">
-                  {selected.type === 'video' ? <Video className="h-4 w-4 text-muted-foreground" /> : <Image className="h-4 w-4 text-muted-foreground" />}
-                  <span className="text-muted-foreground">Type:</span>
-                  <span className="text-foreground capitalize">{selected.type}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <HardDrive className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Size:</span>
-                  <span className="text-foreground">{formatBytes(selected.size)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Uploaded:</span>
-                  <span className="text-foreground">{formatDate(selected.uploadedAt)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Source:</span>
-                  <span className="text-foreground">{selected.source}</span>
-                </div>
-              </div>
-
-              {/* Folder & Collection */}
-              {(selectedFolder || selectedCollection) && (
-                <>
-                  <Separator />
-                  <div className="space-y-2">
-                    {selectedFolder && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Folder:</span>
-                        <Badge variant="secondary" className="text-xs">{selectedFolder.icon} {selectedFolder.name}</Badge>
-                      </div>
-                    )}
-                    {selectedCollection && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Layers className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Collection:</span>
-                        <Badge variant="secondary" className="text-xs">{selectedCollection.name}</Badge>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Tags */}
-              <Separator />
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <Tag className="h-4 w-4" /> Tags
-                </div>
-                {selected.tags.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {selected.tags.map(t => (
-                      <Badge
-                        key={t}
-                        variant="outline"
-                        className="text-xs cursor-pointer hover:bg-primary/10 active:scale-95 transition-all"
-                        onClick={() => { setSelectedId(null); setSearch(t); }}
-                      >
-                        #{t}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No tags</p>
-                )}
-              </div>
-
-              {/* Notes */}
-              {selected.notes && (
-                <>
-                  <Separator />
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-foreground">Notes</p>
-                    <p className="text-sm text-muted-foreground bg-muted rounded-lg p-3">{selected.notes}</p>
-                  </div>
-                </>
-              )}
-
-              {/* Sharing */}
-              <Separator />
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <Link2 className="h-4 w-4" /> Share Links
-                </p>
-                {selectedLinks.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedLinks.map(s => (
-                      <div key={s.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border text-sm">
-                        <div className="min-w-0">
-                          <p className="font-mono text-xs text-foreground truncate">droprelay.app/s/{s.slug}</p>
-                          <p className="text-xs text-muted-foreground">{s.clicks} clicks · {s.active ? 'Active' : 'Inactive'}</p>
-                        </div>
-                        <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => copyLink(s.slug)}>
-                          <Copy className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No share links yet.</p>
-                )}
-                <Button size="sm" variant="outline" className="w-full" onClick={() => createShareLink(selected.id)}>
-                  <Link2 className="h-4 w-4 mr-1" /> Create Share Link
-                </Button>
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      <MediaDetailSheet
+        mediaId={selectedId}
+        onClose={() => setSelectedId(null)}
+        onTagClick={setSearch}
+      />
     </div>
   );
 }

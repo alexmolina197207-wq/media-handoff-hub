@@ -20,6 +20,7 @@ interface AppState {
   upgradeUser: () => void;
   addFolder: (f: Folder) => void;
   reorderFolders: (folders: Folder[]) => void;
+  reorderMedia: (media: MediaFile[]) => void;
   addCollection: (c: Collection) => void;
   deleteMedia: (id: string) => void;
   deleteFolder: (id: string) => void;
@@ -72,6 +73,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFolders(newFolders);
   };
 
+  const reorderMedia = (newMedia: MediaFile[]) => {
+    setMedia(newMedia);
+  };
+
   const addCollection = (c: Collection) => {
     setCollections(prev => [...prev, c]);
   };
@@ -91,7 +96,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user, media, folders, collections,
       shareLinks, storage, activity: demoActivity,
       isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, addShareLink, upgradeUser,
-      addFolder, reorderFolders, addCollection, deleteFolder, deleteCollection,
+      addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
     }}>
       {children}
     </AppContext.Provider>

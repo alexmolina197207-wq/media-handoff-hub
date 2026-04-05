@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, Image, Upload, FolderOpen, Link2, Layers, HardDrive, BarChart3, Settings, LogOut, Sun, Moon,
 } from 'lucide-react';
+import NotificationCenter from '@/components/NotificationCenter';
 
 const navItems = [
   { title: 'Dashboard', url: '/app', icon: LayoutDashboard },
@@ -95,7 +96,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center border-b border-border px-4 bg-card">
             <SidebarTrigger className="mr-4" />
             <h2 className="font-semibold text-foreground text-sm">DropRelay Dashboard</h2>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
+              <NotificationCenter />
               <ThemeToggle />
             </div>
           </header>

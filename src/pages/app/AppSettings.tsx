@@ -72,6 +72,8 @@ export default function AppSettings() {
 
       <SecuritySettings />
 
+      <NotificationPreferences />
+
       <Card className="shadow-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">

@@ -20,6 +20,8 @@ import BulkActionBar from '@/components/BulkActionBar';
 import { format } from 'date-fns';
 
 type DatePreset = 'all' | 'today' | 'week' | 'month' | 'custom';
+type SortField = 'date' | 'name' | 'size' | 'type';
+type SortDir = 'asc' | 'desc';
 
 export default function Library() {
   const { media, folders, collections, addShareLink, reorderMedia } = useApp();

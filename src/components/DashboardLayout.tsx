@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -8,8 +8,9 @@ import {
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
-  LayoutDashboard, Image, Upload, FolderOpen, Link2, Layers, HardDrive, BarChart3, Settings, LogOut, Sun, Moon, MoreHorizontal,
+  LayoutDashboard, Image, Upload, FolderOpen, Link2, Layers, HardDrive, BarChart3, Settings, LogOut, Sun, Moon, Menu,
 } from 'lucide-react';
 import NotificationCenter from '@/components/NotificationCenter';
 import { cn } from '@/lib/utils';
@@ -26,20 +27,6 @@ const navItems = [
   { title: 'Analytics', url: '/app/analytics', icon: BarChart3 },
   { title: 'Settings', url: '/app/settings', icon: Settings },
 ];
-
-// Primary tabs shown in the bottom bar (max 5)
-const bottomTabs = [
-  { title: 'Home', url: '/app', icon: LayoutDashboard },
-  { title: 'Library', url: '/app/library', icon: Image },
-  { title: 'Upload', url: '/app/upload', icon: Upload },
-  { title: 'Links', url: '/app/shared', icon: Link2 },
-  { title: 'More', url: '__more__', icon: MoreHorizontal },
-];
-
-// Items shown in the "More" sheet on mobile
-const moreItems = navItems.filter(
-  item => !bottomTabs.some(tab => tab.url === item.url)
-);
 
 function AppSidebar() {
   const { state } = useSidebar();
@@ -118,10 +105,10 @@ function ThemeToggle() {
   );
 }
 
-function MobileBottomNav() {
+function MobileDrawerNav() {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [moreOpen, setMoreOpen] = useState(false);
   const { user, setAuthenticated } = useApp();
 
   const isActive = (url: string) => {
@@ -129,88 +116,72 @@ function MobileBottomNav() {
     return location.pathname.startsWith(url);
   };
 
-  // Check if current route is in "more" items
-  const isMoreActive = moreItems.some(item => isActive(item.url));
-
   return (
     <>
-      {/* More sheet overlay */}
-      {moreOpen && (
-        <div className="fixed inset-0 z-40 bg-black/40 animate-fade-in" onClick={() => setMoreOpen(false)} />
-      )}
-      {moreOpen && (
-        <div className="fixed bottom-16 left-2 right-2 z-50 bg-card border border-border rounded-xl shadow-elevated p-2 animate-fade-in">
-          <div className="grid grid-cols-3 gap-1">
-            {moreItems.map(item => (
-              <button
-                key={item.url}
-                onClick={() => { navigate(item.url); setMoreOpen(false); }}
-                className={cn(
-                  'flex flex-col items-center gap-1 p-3 rounded-lg transition-colors',
-                  isActive(item.url)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted'
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium">{item.title}</span>
-              </button>
-            ))}
-          </div>
-          <div className="border-t border-border mt-2 pt-2 flex items-center justify-between px-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 md:hidden"
+        onClick={() => setOpen(true)}
+        aria-label="Open navigation menu"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="left" className="w-72 p-0">
+          <SheetHeader className="p-4 border-b border-border">
+            <SheetTitle className="flex items-center gap-2">
+              <img src={anyrelayLogo} alt="AnyRelay" className="w-7 h-7 shrink-0" />
+              <span className="font-bold text-foreground">AnyRelay</span>
+            </SheetTitle>
+          </SheetHeader>
+
+          <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+            {navItems.map(item => {
+              const active = isActive(item.url);
+              return (
+                <button
+                  key={item.url}
+                  onClick={() => { navigate(item.url); setOpen(false); }}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
+                    active
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-foreground hover:bg-muted'
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span>{item.title}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="mt-auto p-3 border-t border-border">
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
                 {user.name.split(' ').map(n => n[0]).join('')}
               </div>
-              <span className="text-xs text-muted-foreground truncate">{user.name}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.plan} plan</p>
+              </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground"
-              onClick={() => { setAuthenticated(false); navigate('/'); }}
+              className="w-full justify-start text-muted-foreground hover:text-foreground"
+              onClick={() => { setAuthenticated(false); navigate('/'); setOpen(false); }}
             >
-              <LogOut className="h-3 w-3 mr-1" /> Sign out
+              <LogOut className="mr-2 h-4 w-4" /> Sign out
             </Button>
           </div>
-        </div>
-      )}
-
-      {/* Bottom tab bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 bg-card border-t border-border md:hidden safe-area-bottom">
-        <div className="flex items-stretch">
-          {bottomTabs.map(tab => {
-            const active = tab.url === '__more__' ? (isMoreActive || moreOpen) : isActive(tab.url);
-            return (
-              <button
-                key={tab.title}
-                onClick={() => {
-                  if (tab.url === '__more__') {
-                    setMoreOpen(prev => !prev);
-                  } else {
-                    setMoreOpen(false);
-                    navigate(tab.url);
-                  }
-                }}
-                className={cn(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors',
-                  active ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                <tab.icon className={cn('h-5 w-5', active && 'scale-110')} />
-                <span className={cn('text-[10px]', active ? 'font-semibold' : 'font-medium')}>
-                  {tab.title}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
-
-import { useState } from 'react';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -219,23 +190,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center border-b border-border px-4 bg-card">
+            <MobileDrawerNav />
             <SidebarTrigger className="mr-4 hidden md:flex" />
-            <div className="flex items-center gap-2 md:hidden">
-              <div className="w-7 h-7 rounded-lg gradient-hero flex items-center justify-center shrink-0">
-                <span className="font-bold text-[10px]" style={{color:'white'}}>DR</span>
-              </div>
-            </div>
             <h2 className="font-semibold text-foreground text-sm ml-2 md:ml-0">AnyRelay Dashboard</h2>
             <div className="ml-auto flex items-center gap-1">
               <NotificationCenter />
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6 overflow-auto pb-20 md:pb-6">
+          <main className="flex-1 p-4 md:p-6 overflow-auto">
             {children}
           </main>
         </div>
-        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );

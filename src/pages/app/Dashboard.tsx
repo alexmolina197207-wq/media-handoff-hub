@@ -57,31 +57,42 @@ export default function Dashboard() {
         <Card className="shadow-card border-border">
           <CardHeader><CardTitle className="text-base">Recent Uploads</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {media.slice(0, 5).map(m => (
-              <Link key={m.id} to="/app/library" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 active:bg-muted transition-colors">
-                <img src={m.previewUrl} alt={m.title} className="w-10 h-10 rounded-md object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(m.uploadedAt)} · {formatBytes(m.size)}</p>
-                </div>
-                <Badge variant="secondary" className="text-xs shrink-0">{m.type}</Badge>
-              </Link>
-            ))}
+            {media.length === 0 ? (
+              <div className="text-center py-8">
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">No files yet — upload your first file to get started</p>
+              </div>
+            ) : (
+              media.slice(0, 5).map(m => (
+                <Link key={m.id} to="/app/library" className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 active:bg-muted transition-colors">
+                  <img src={m.previewUrl} alt={m.title} className="w-10 h-10 rounded-md object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(m.uploadedAt)} · {formatBytes(m.size)}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs shrink-0">{m.type}</Badge>
+                </Link>
+              ))
+            )}
           </CardContent>
         </Card>
 
         <Card className="shadow-card border-border">
           <CardHeader><CardTitle className="text-base">Top Tags</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {activity.topTags.map(tag => (
-                <Link key={tag} to={`/app/library?tag=${encodeURIComponent(tag)}`}>
-                  <Badge variant="secondary" className="text-sm cursor-pointer hover:bg-primary/10 active:scale-95 transition-all">
-                    #{tag}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
+            {activity.topTags.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No tags yet</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {activity.topTags.map(tag => (
+                  <Link key={tag} to={`/app/library?tag=${encodeURIComponent(tag)}`}>
+                    <Badge variant="secondary" className="text-sm cursor-pointer hover:bg-primary/10 active:scale-95 transition-all">
+                      #{tag}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium text-foreground mb-2">Storage</p>
               <div className="w-full bg-muted rounded-full h-3">

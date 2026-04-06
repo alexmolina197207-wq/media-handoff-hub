@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   MediaFile, Folder, Collection, ShareLink, StorageSummary, ActivitySummary, User,
-  demoUser, demoMedia, demoFolders, demoCollections, demoShareLinks, demoStorage, demoActivity,
+  demoUser,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
 
@@ -63,11 +63,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
   const [user, setUser] = useState<User>(demoUser);
-  const [media, setMedia] = useState<MediaFile[]>(demoMedia);
-  const [folders, setFolders] = useState<Folder[]>(demoFolders);
-  const [collections, setCollections] = useState<Collection[]>(demoCollections);
-  const [shareLinks, setShareLinks] = useState<ShareLink[]>(demoShareLinks);
-  const [storage, setStorage] = useState<StorageSummary>(demoStorage);
+  const [media, setMedia] = useState<MediaFile[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [shareLinks, setShareLinks] = useState<ShareLink[]>([]);
+  const [storage, setStorage] = useState<StorageSummary>({ used: 0, limit: 500_000_000, fileCount: 0, recentUploads: 0 });
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => {
     try { return localStorage.getItem('dr_2fa_enabled') === 'true'; } catch { return false; }
   });
@@ -224,12 +224,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       user, media, folders, collections,
-      shareLinks, storage, activity: demoActivity,
+      shareLinks, storage,
       isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
       tagPresets, addTagPreset, deleteTagPreset, updateTagPreset,
       hasUploaded,
+      activity: { uploadsThisWeek: 0, sharesThisWeek: 0, topTags: [], collectionsActive: 0 },
     }}>
       {children}
     </AppContext.Provider>

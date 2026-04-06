@@ -384,8 +384,10 @@ export default function UploadPage() {
 
       {/* Drop zone */}
       <Card
-        className={`border-2 border-dashed cursor-pointer transition-all ${
-          isDragging ? "border-primary bg-primary/5 scale-[1.01] shadow-lg" : "border-border hover:border-primary/50"
+        className={`border-2 border-dashed cursor-pointer transition-all duration-300 ease-out ${
+          isDragging
+            ? "border-primary bg-primary/10 scale-[1.02] shadow-xl shadow-primary/10 ring-2 ring-primary/20"
+            : "border-border hover:border-primary/50 hover:bg-muted/30"
         }`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -394,19 +396,25 @@ export default function UploadPage() {
         onClick={() => inputRef.current?.click()}
       >
         <CardContent className="py-12 text-center">
-          <Upload
-            className={`h-10 w-10 mx-auto mb-3 transition-colors ${isDragging ? "text-primary" : "text-muted-foreground"}`}
-          />
-          <p className="text-foreground font-medium mb-1">
-            {isDragging ? "Drop files here" : "Drag & drop files here"}
-          </p>
-          <p className="text-sm text-muted-foreground mb-3">or click to browse</p>
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className={`transition-transform duration-300 ease-out ${isDragging ? "-translate-y-2" : ""}`}>
+            <Upload
+              className={`h-10 w-10 mx-auto mb-3 transition-all duration-300 ${
+                isDragging ? "text-primary scale-125" : "text-muted-foreground"
+              }`}
+            />
+            <p className="text-foreground font-medium mb-1">
+              {isDragging ? "Drop files here" : "Drag & drop files here"}
+            </p>
+            <p className={`text-sm mb-3 transition-colors duration-200 ${isDragging ? "text-primary/70" : "text-muted-foreground"}`}>
+              {isDragging ? "Release to add files" : "or click to browse"}
+            </p>
+          </div>
+          <div className={`flex items-center justify-center gap-2 text-xs text-muted-foreground transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>
             <Image className="h-3.5 w-3.5" /> JPEG, PNG, WebP, GIF
             <span className="mx-1.5 text-border">|</span>
             <Video className="h-3.5 w-3.5" /> MP4, MOV, WebM
           </div>
-          <p className="text-xs text-muted-foreground mt-2">Max {formatBytes(MAX_FILE_SIZE)} per file</p>
+          <p className={`text-xs text-muted-foreground mt-2 transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>Max {formatBytes(MAX_FILE_SIZE)} per file</p>
         </CardContent>
       </Card>
 

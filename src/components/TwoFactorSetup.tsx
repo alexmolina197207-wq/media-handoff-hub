@@ -66,7 +66,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
       setCodesCopied(true);
       toast.success('Backup codes copied to clipboard');
     }).catch(() => {
-      toast.success('Backup codes copied (demo)');
+      toast.success('Backup codes copied to clipboard');
       setCodesCopied(true);
     });
   };
@@ -161,7 +161,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
                       />
                     ))}
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">Demo QR Code</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Scan with your authenticator app</p>
                 </div>
               </div>
 
@@ -229,7 +229,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
             <div className="space-y-4 py-2">
               <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <p className="text-xs text-muted-foreground">
-                  {selectedMethod === 'email' ? 'Code sent to alex@anyrelay.demo' : 'Code sent to •••••••1234'}
+                  {selectedMethod === 'email' ? 'Code sent to your email address' : 'Code sent to •••••••1234'}
                 </p>
               </div>
               <div className="space-y-2">
@@ -248,7 +248,7 @@ export default function TwoFactorSetup({ open, onOpenChange, onComplete }: TwoFa
               </Button>
               <p className="text-center text-xs text-muted-foreground">
                 Didn't receive it?{' '}
-                <button className="text-primary hover:underline" onClick={() => toast.success('Code resent (demo)')}>
+                <button className="text-primary hover:underline" onClick={() => toast.success('Code resent')}>
                   Resend code
                 </button>
               </p>

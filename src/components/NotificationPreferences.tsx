@@ -60,7 +60,7 @@ export default function NotificationPreferences() {
     setPrefs(prev => ({ ...prev, [id]: checked }));
     const pref = SECURITY_NOTIFICATIONS.find(n => n.id === id);
     toast.success(
-      `${pref?.label} notifications ${checked ? 'enabled' : 'disabled'} (demo)`
+      `${pref?.label} notifications ${checked ? 'enabled' : 'disabled'}`
     );
   };
 

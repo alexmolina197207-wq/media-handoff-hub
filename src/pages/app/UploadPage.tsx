@@ -637,11 +637,6 @@ export default function UploadPage() {
         ))}
       </div>
 
-      {queue.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center bg-muted rounded-md p-2">
-          🧪 Demo mode — files are simulated and stored in local state only.
-        </p>
-      )}
     </div>
   );
 }

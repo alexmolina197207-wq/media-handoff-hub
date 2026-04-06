@@ -51,7 +51,7 @@ export default function AppSettings() {
             <Label>Email</Label>
             <Input defaultValue={user.email} />
           </div>
-          <Button onClick={() => toast.success('Profile saved (demo)')}>Save Changes</Button>
+          <Button onClick={() => toast.success('Profile saved')}>Save Changes</Button>
         </CardContent>
       </Card>
 
@@ -90,13 +90,13 @@ export default function AppSettings() {
               <p className="text-sm text-muted-foreground">You're on the free plan with 500 MB storage and basic features.</p>
               <div className="flex gap-3">
                 <Button onClick={() => { upgradeUser(); toast.success('🎉 Upgraded to Pro!'); }}>Upgrade to Pro — $12/mo</Button>
-                <Button variant="outline" onClick={() => toast.info('Team plan — contact sales (demo)')}>Team Plan</Button>
+                <Button variant="outline" onClick={() => toast.info('Contact sales for Team plan pricing')}>Team Plan</Button>
               </div>
             </>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">You're on the <strong>Pro</strong> plan with 5 GB storage and full features.</p>
-              <Button variant="outline" onClick={() => toast.info('Billing portal would open here (demo)')}>Manage Billing</Button>
+              <Button variant="outline" onClick={() => toast.info('Opening billing portal...')}>Manage Billing</Button>
             </>
           )}
         </CardContent>

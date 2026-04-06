@@ -82,6 +82,7 @@ export default function Landing() {
               See How It Works
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-4">No signup required • Works on any device</p>
         </div>
       </section>
 

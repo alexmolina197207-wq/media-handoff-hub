@@ -1,4 +1,5 @@
 import { Upload, Link2, Share2 } from 'lucide-react';
+import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 
 const steps = [
   {
@@ -22,16 +23,26 @@ const steps = [
 ];
 
 export default function HowItWorks() {
+  const { ref, isVisible } = useScrollReveal();
+
   return (
     <section id="how-it-works" className="py-24 bg-muted/30 px-4">
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl" ref={ref}>
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">How it works</h2>
           <p className="text-muted-foreground">Three steps. No friction.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-10 md:gap-12">
-          {steps.map((s) => (
-            <div key={s.step} className="text-center">
+          {steps.map((s, i) => (
+            <div
+              key={s.step}
+              className="text-center transition-all duration-500 ease-out"
+              style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                transitionDelay: `${i * 150}ms`,
+              }}
+            >
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
                 <s.icon className="h-6 w-6 text-primary" />
               </div>

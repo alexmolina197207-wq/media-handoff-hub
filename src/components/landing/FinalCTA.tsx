@@ -1,13 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 
 export default function FinalCTA() {
   const navigate = useNavigate();
+  const { ref, isVisible } = useScrollReveal();
 
   return (
     <section className="py-24 px-4">
-      <div className="container mx-auto max-w-2xl text-center">
+      <div
+        ref={ref}
+        className="container mx-auto max-w-2xl text-center"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transition: 'opacity 0.6s ease-out',
+        }}
+      >
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
           Start sharing in seconds
         </h2>

@@ -51,9 +51,13 @@ export default function Landing() {
             <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Log in</Button>
-            <Button size="sm" onClick={() => navigate('/login')}>Start Sharing Free <ArrowRight className="ml-1 h-4 w-4" /></Button>
+          <div className="flex items-center gap-2 md:gap-3">
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate('/login')}>Log in</Button>
+            <Button size="sm" onClick={() => navigate('/login')}>
+              <span className="hidden sm:inline">Start Sharing Free</span>
+              <span className="sm:hidden">Start Free</span>
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </nav>

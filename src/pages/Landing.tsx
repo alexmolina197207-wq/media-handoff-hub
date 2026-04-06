@@ -63,8 +63,8 @@ export default function Landing() {
         <div className="container mx-auto text-center max-w-3xl animate-fade-in">
           <Badge variant="secondary" className="mb-4">Now in public demo</Badge>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
-            Private, secure file sharing<br />
-            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>across any network or device</span>
+            Share anything. Anywhere.<br />
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Upload, organize, and share files across every platform.

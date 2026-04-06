@@ -44,6 +44,7 @@ interface AppState {
   addTagPreset: (preset: TagPreset) => void;
   deleteTagPreset: (id: string) => void;
   updateTagPreset: (id: string, updates: Partial<TagPreset>) => void;
+  hasUploaded: boolean;
 }
 
 const AppContext = createContext<AppState | null>(null);

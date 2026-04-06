@@ -101,9 +101,6 @@ export default function Login() {
               {isSignup ? 'Sign in' : 'Create one'}
             </button>
           </p>
-          <p className="text-center text-xs text-muted-foreground mt-3 bg-muted rounded-md p-2">
-            🧪 This is a demo environment. No real account is created.
-          </p>
         </CardContent>
       </Card>
 

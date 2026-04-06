@@ -67,8 +67,8 @@ export default function Landing() {
             <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Upload, organize, and share files across every platform.
-            AnyRelay is the fastest way to securely send and manage your content — no friction.
+            Store, organize, and share files across any device with complete privacy.
+            No tracking, no ads, no compromise.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button size="lg" onClick={() => navigate('/login')}>

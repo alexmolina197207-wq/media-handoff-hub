@@ -93,7 +93,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
-        "gradient-shift": "gradient-shift 4s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 6s ease-in-out infinite",
       },
     },
   },

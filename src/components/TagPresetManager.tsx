@@ -1,10 +1,74 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useApp, TagPreset } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Layers, Plus, X, Trash2, Check, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+
+function SwipeableRow({
+  onDelete,
+  children,
+}: {
+  onDelete: () => void;
+  children: React.ReactNode;
+}) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const startX = useRef(0);
+  const currentX = useRef(0);
+  const swiping = useRef(false);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    currentX.current = 0;
+    swiping.current = true;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!swiping.current || !rowRef.current) return;
+    const diff = e.touches[0].clientX - startX.current;
+    // Only allow left swipe
+    currentX.current = Math.min(0, diff);
+    rowRef.current.style.transform = `translateX(${currentX.current}px)`;
+    rowRef.current.style.transition = 'none';
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!rowRef.current) return;
+    swiping.current = false;
+    const threshold = -80;
+    if (currentX.current < threshold) {
+      // Animate off-screen then delete
+      rowRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
+      rowRef.current.style.transform = 'translateX(-100%)';
+      rowRef.current.style.opacity = '0';
+      setTimeout(onDelete, 200);
+    } else {
+      // Snap back
+      rowRef.current.style.transition = 'transform 200ms ease-out';
+      rowRef.current.style.transform = 'translateX(0)';
+    }
+    currentX.current = 0;
+  }, [onDelete]);
+
+  return (
+    <div className="relative overflow-hidden rounded-lg">
+      {/* Delete background */}
+      <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-4 rounded-lg">
+        <Trash2 className="h-4 w-4 text-destructive-foreground" />
+      </div>
+      <div
+        ref={rowRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className="relative"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   fileIds: string[];

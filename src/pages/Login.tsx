@@ -14,7 +14,7 @@ import LoginTwoFactor from '@/components/LoginTwoFactor';
 
 export default function Login() {
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState('alex@anyrelay.demo');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show2FA, setShow2FA] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -76,7 +76,7 @@ export default function Login() {
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -91,7 +91,7 @@ export default function Login() {
                   </button>
                 )}
               </div>
-              <Input id="password" type="password" placeholder="Enter any password" value={password} onChange={e => setPassword(e.target.value)} />
+              <Input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} />
             </div>
             <Button type="submit" className="w-full">{isSignup ? 'Create Account' : 'Sign In'}</Button>
           </form>
@@ -100,6 +100,9 @@ export default function Login() {
             <button className="text-primary hover:underline font-medium" onClick={() => setIsSignup(!isSignup)}>
               {isSignup ? 'Sign in' : 'Create one'}
             </button>
+          </p>
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            No account? You can still upload without signing in.
           </p>
         </CardContent>
       </Card>

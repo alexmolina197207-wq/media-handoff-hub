@@ -20,7 +20,6 @@ const reasons = [
 ];
 
 export default function WhyAnyRelay() {
-  return (
   const { ref, isVisible } = useScrollReveal();
 
   return (

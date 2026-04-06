@@ -23,7 +23,6 @@ const steps = [
 ];
 
 export default function HowItWorks() {
-  return (
   const { ref, isVisible } = useScrollReveal();
 
   return (

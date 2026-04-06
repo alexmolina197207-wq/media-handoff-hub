@@ -61,11 +61,12 @@ function SwipeableRow({
 
   const handleConfirmDelete = useCallback(() => {
     if (!rowRef.current) return;
+    vibrate([5, 30, 5]);
     rowRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
     rowRef.current.style.transform = 'translateX(-100%)';
     rowRef.current.style.opacity = '0';
     setTimeout(onDelete, 200);
-  }, [onDelete]);
+  }, [onDelete, vibrate]);
 
   const handleCancelDelete = useCallback(() => {
     setConfirming(false);

@@ -204,6 +204,20 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
     setEditingId(null);
   };
 
+  const handleDelete = (preset: TagPreset) => {
+    deleteTagPreset(preset.id);
+    toast(`Deleted "${preset.name}"`, {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          addTagPreset(preset);
+          toast.success(`Restored "${preset.name}"`);
+        },
+      },
+      duration: 5000,
+    });
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -238,7 +252,7 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
             ) : (
               <SwipeableRow
                 key={preset.id}
-                onDelete={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
+                onDelete={() => handleDelete(preset)}
               >
                 <div
                   className="group flex items-start gap-2 p-2 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
@@ -269,7 +283,7 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
                       size="sm"
                       variant="ghost"
                       className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                      onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
+                      onClick={() => handleDelete(preset)}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>

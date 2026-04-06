@@ -74,7 +74,6 @@ function AppSidebar() {
                         end
                         className={cn(
                           'hover:bg-sidebar-accent',
-                          item.title === 'Upload' && !active && 'ring-1 ring-primary/30 bg-primary/5 font-medium text-primary',
                           active && 'bg-sidebar-accent text-sidebar-primary font-medium'
                         )}
                         activeClassName=""

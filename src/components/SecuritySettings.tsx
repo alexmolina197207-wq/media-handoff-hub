@@ -221,11 +221,6 @@ export default function SecuritySettings() {
                 {verificationSent ? 'Sent ✓' : 'Resend'}
               </Button>
             )}
-            {emailVerified && (
-              <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={() => { setEmailVerified(false); toast.info('Email marked as unverified (demo)'); }}>
-                Test unverified
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>

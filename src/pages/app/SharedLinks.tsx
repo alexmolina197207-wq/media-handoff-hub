@@ -348,9 +348,6 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground text-center bg-muted rounded-md p-2">
-        🧪 Engagement data is simulated for demo purposes.
-      </p>
     </div>
   );
 }

@@ -74,9 +74,6 @@ export default function LoginTwoFactor({ method, onVerify, onBack }: LoginTwoFac
               <ArrowLeft className="h-3 w-3" /> Back to sign in
             </button>
           </div>
-          <p className="text-center text-xs text-muted-foreground mt-3 bg-muted rounded-md p-2">
-            🧪 Enter any 6+ digit code to continue (demo).
-          </p>
         </CardContent>
       </Card>
     </div>

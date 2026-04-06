@@ -41,7 +41,7 @@ export default function Login() {
   const handleForgotPassword = () => {
     if (!resetEmail) return;
     setResetSent(true);
-    toast.success('Password reset link sent (demo)');
+    toast.success('Password reset link sent');
   };
 
   if (show2FA) {
@@ -63,7 +63,7 @@ export default function Login() {
           </div>
           <CardTitle>{isSignup ? 'Create Account' : 'Welcome Back'}</CardTitle>
           <CardDescription>
-            {isSignup ? 'Start your demo experience' : 'Sign in to your demo account'}
+            {isSignup ? 'Create your account to get started' : 'Sign in to your account'}
           </CardDescription>
         </CardHeader>
         <CardContent>

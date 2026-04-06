@@ -117,9 +117,6 @@ export default function Analytics() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground text-center bg-muted rounded-md p-2">
-        🧪 Analytics data is simulated for demo purposes.
-      </p>
 
       {/* Engagement detail sheet */}
       <Sheet open={!!selectedLinkId} onOpenChange={(open) => !open && setSelectedLinkId(null)}>
@@ -266,9 +263,6 @@ function EngagementDetail({ link, file }: {
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground text-center bg-muted rounded-md p-2">
-        🧪 Engagement data is simulated for demo purposes.
-      </p>
     </div>
   );
 }

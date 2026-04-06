@@ -68,7 +68,7 @@ export default function Landing() {
           
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
             Share anything. Anywhere.<br />
-            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>
+            <span className="bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_200%]" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Store, organize, and share files across any device with complete privacy.

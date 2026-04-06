@@ -25,7 +25,7 @@ export default function Navbar() {
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate('/login')}>Log in</Button>
-          <Button size="sm" onClick={() => navigate('/login')}>
+          <Button size="sm" onClick={() => navigate('/app')}>
             <span className="hidden sm:inline">Start Sharing Free</span>
             <span className="sm:hidden">Start Free</span>
             <ArrowRight className="ml-1 h-4 w-4" />

@@ -64,24 +64,27 @@ function AppSidebar() {
           <SidebarGroupLabel className="text-sidebar-foreground/50">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/app'}
-                      className={cn(
-                        'hover:bg-sidebar-accent',
-                        item.title === 'Upload' && !isItemActive(item.url) && 'ring-1 ring-primary/30 bg-primary/5 font-medium text-primary'
-                      )}
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium !ring-0 !bg-sidebar-accent"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map(item => {
+                const active = isItemActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className={cn(
+                          'hover:bg-sidebar-accent',
+                          active && 'bg-sidebar-accent text-sidebar-primary font-medium'
+                        )}
+                        activeClassName=""
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

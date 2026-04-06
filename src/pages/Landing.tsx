@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Upload, FolderOpen, Link2, BarChart3, Shield, Zap, Star, Check } from 'lucide-react';
+import { ArrowRight, Upload, FolderOpen, Link2, BarChart3, Shield, Zap, Star, Check, Moon, Sun } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 import anyrelayLogo from '@/assets/anyrelay-logo.png';
 
 const features = [
@@ -35,7 +36,7 @@ const faqs = [
 ];
 
 export default function Landing() {
-  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-background gradient-bg">
@@ -52,6 +53,9 @@ export default function Landing() {
             <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
           </div>
           <div className="flex items-center gap-2 md:gap-3">
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate('/login')}>Log in</Button>
             <Button size="sm" onClick={() => navigate('/login')}>
               <span className="hidden sm:inline">Start Sharing Free</span>

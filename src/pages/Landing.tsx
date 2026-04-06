@@ -72,10 +72,10 @@ export default function Landing() {
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button size="lg" onClick={() => navigate('/login')}>
-              Start Demo <ArrowRight className="ml-2 h-5 w-5" />
+              Start Sharing Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button variant="outline" size="lg" onClick={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              See Features
+              See How It Works
             </Button>
           </div>
         </div>

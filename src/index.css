@@ -52,25 +52,29 @@
   }
 
   .dark {
-    --background: 220 20% 7%;
-    --foreground: 210 15% 93%;
-    --card: 220 18% 11%;
-    --card-foreground: 210 15% 93%;
-    --popover: 220 18% 11%;
-    --popover-foreground: 210 15% 93%;
-    --primary: 215 80% 55%;
+    --background: 260 30% 6%;
+    --foreground: 240 10% 93%;
+    --card: 255 25% 10%;
+    --card-foreground: 240 10% 93%;
+    --popover: 255 25% 10%;
+    --popover-foreground: 240 10% 93%;
+    --primary: 250 70% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 210 15% 85%;
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 12% 55%;
-    --accent: 170 70% 42%;
+    --secondary: 255 20% 16%;
+    --secondary-foreground: 240 10% 85%;
+    --muted: 255 20% 13%;
+    --muted-foreground: 240 10% 55%;
+    --accent: 210 80% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 215 80% 55%;
+    --border: 255 18% 18%;
+    --input: 255 18% 18%;
+    --ring: 250 70% 60%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(270 70% 60%), hsl(210 80% 55%));
+    --gradient-primary: linear-gradient(135deg, hsl(270 70% 55%), hsl(210 80% 55%));
+    --gradient-bg: radial-gradient(ellipse at top, hsl(270 30% 12%) 0%, hsl(260 30% 6%) 50%, hsl(220 40% 8%) 100%);
   }
 }
 

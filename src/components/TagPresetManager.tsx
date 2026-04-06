@@ -17,17 +17,24 @@ function SwipeableRow({
   const startX = useRef(0);
   const currentX = useRef(0);
   const swiping = useRef(false);
+  const [confirming, setConfirming] = useState(false);
+
+  const resetPosition = useCallback(() => {
+    if (!rowRef.current) return;
+    rowRef.current.style.transition = 'transform 200ms ease-out';
+    rowRef.current.style.transform = 'translateX(0)';
+  }, []);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (confirming) return;
     startX.current = e.touches[0].clientX;
     currentX.current = 0;
     swiping.current = true;
-  }, []);
+  }, [confirming]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     if (!swiping.current || !rowRef.current) return;
     const diff = e.touches[0].clientX - startX.current;
-    // Only allow left swipe
     currentX.current = Math.min(0, diff);
     rowRef.current.style.transform = `translateX(${currentX.current}px)`;
     rowRef.current.style.transition = 'none';
@@ -38,24 +45,54 @@ function SwipeableRow({
     swiping.current = false;
     const threshold = -80;
     if (currentX.current < threshold) {
-      // Animate off-screen then delete
-      rowRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
-      rowRef.current.style.transform = 'translateX(-100%)';
-      rowRef.current.style.opacity = '0';
-      setTimeout(onDelete, 200);
-    } else {
-      // Snap back
+      // Hold at reveal position and show confirm
       rowRef.current.style.transition = 'transform 200ms ease-out';
-      rowRef.current.style.transform = 'translateX(0)';
+      rowRef.current.style.transform = 'translateX(-90px)';
+      setConfirming(true);
+    } else {
+      resetPosition();
     }
     currentX.current = 0;
+  }, [resetPosition]);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!rowRef.current) return;
+    rowRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
+    rowRef.current.style.transform = 'translateX(-100%)';
+    rowRef.current.style.opacity = '0';
+    setTimeout(onDelete, 200);
   }, [onDelete]);
+
+  const handleCancelDelete = useCallback(() => {
+    setConfirming(false);
+    resetPosition();
+  }, [resetPosition]);
 
   return (
     <div className="relative overflow-hidden rounded-lg">
-      {/* Delete background */}
-      <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-4 rounded-lg">
-        <Trash2 className="h-4 w-4 text-destructive-foreground" />
+      {/* Delete background with confirm/cancel */}
+      <div className="absolute inset-0 bg-destructive flex items-center justify-end gap-1.5 pr-2 rounded-lg">
+        {confirming ? (
+          <>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 text-[10px] px-2 text-destructive-foreground hover:bg-destructive-foreground/20"
+              onClick={handleCancelDelete}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              className="h-6 text-[10px] px-2 bg-destructive-foreground text-destructive hover:bg-destructive-foreground/90"
+              onClick={handleConfirmDelete}
+            >
+              Delete
+            </Button>
+          </>
+        ) : (
+          <Trash2 className="h-4 w-4 text-destructive-foreground" />
+        )}
       </div>
       <div
         ref={rowRef}

@@ -93,6 +93,12 @@
   .gradient-hero {
     background: var(--gradient-hero);
   }
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  .gradient-bg {
+    background: var(--gradient-bg);
+  }
   .shadow-card {
     box-shadow: var(--shadow-card);
   }

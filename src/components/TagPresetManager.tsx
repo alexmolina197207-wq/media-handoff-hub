@@ -199,42 +199,46 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
                 saveLabel="Update"
               />
             ) : (
-              <div
+              <SwipeableRow
                 key={preset.id}
-                className="group flex items-start gap-2 p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                onDelete={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{preset.name}</p>
-                  <div className="flex flex-wrap gap-0.5 mt-1">
-                    {preset.tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-[9px] px-1.5 py-0">
-                        {tag}
-                      </Badge>
-                    ))}
+                <div
+                  className="group flex items-start gap-2 p-2 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">{preset.name}</p>
+                    <div className="flex flex-wrap gap-0.5 mt-1">
+                      {preset.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-[9px] px-1.5 py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" className="h-6 text-[10px] px-2" onClick={() => handleApply(preset)}>
+                      Apply
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                      onClick={() => { setEditingId(preset.id); setCreating(false); }}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1 shrink-0">
-                  <Button size="sm" className="h-6 text-[10px] px-2" onClick={() => handleApply(preset)}>
-                    Apply
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
-                    onClick={() => { setEditingId(preset.id); setCreating(false); }}
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                    onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
+              </SwipeableRow>
             )
           )}
         </div>

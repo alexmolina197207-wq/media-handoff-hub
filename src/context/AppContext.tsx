@@ -96,9 +96,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch {}
   };
 
+  const [hasUploaded, setHasUploaded] = useState(() => {
+    try { return localStorage.getItem('dr_has_uploaded') === 'true'; } catch { return false; }
+  });
+
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);
     setStorage(prev => ({ ...prev, fileCount: prev.fileCount + 1, used: prev.used + m.size, recentUploads: prev.recentUploads + 1 }));
+    if (!hasUploaded) {
+      setHasUploaded(true);
+      try { localStorage.setItem('dr_has_uploaded', 'true'); } catch {}
+    }
     addNotification({
       type: 'upload',
       title: 'Upload complete',
@@ -221,6 +229,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
       tagPresets, addTagPreset, deleteTagPreset, updateTagPreset,
+      hasUploaded,
     }}>
       {children}
     </AppContext.Provider>

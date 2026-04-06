@@ -7,7 +7,7 @@ import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp, ChevronRight,
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
-  const { media, storage, activity, folders, collections, shareLinks } = useApp();
+  const { media, storage, activity, folders, collections, shareLinks, hasUploaded } = useApp();
   const navigate = useNavigate();
 
   const stats = [
@@ -21,20 +21,22 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Onboarding banner */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Welcome to AnyRelay</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Start by uploading your first file to generate a secure share link — no account needed.
-          </p>
+      {/* Onboarding banner — hidden after first upload */}
+      {!hasUploaded && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Welcome to AnyRelay</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">
+              Start by uploading your first file to generate a secure share link — no account needed.
+            </p>
+          </div>
+          <Button size="lg" className="gradient-hero shrink-0 gap-2" style={{ color: 'white' }} onClick={() => navigate('/app/upload')}>
+            <Upload className="h-4 w-4" />
+            Upload File
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
-        <Button size="lg" className="gradient-hero shrink-0 gap-2" style={{ color: 'white' }} onClick={() => navigate('/app/upload')}>
-          <Upload className="h-4 w-4" />
-          Upload File
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {stats.map(s => (

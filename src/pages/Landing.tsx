@@ -192,7 +192,7 @@ export default function Landing() {
           <h2 className="text-3xl font-bold text-foreground mb-4">Ready to simplify your file sharing?</h2>
           <p className="text-muted-foreground mb-8">Try the demo — no signup required. See how AnyRelay makes secure file sharing effortless.</p>
           <Button size="lg" onClick={() => navigate('/login')}>
-            Start Demo <ArrowRight className="ml-2 h-5 w-5" />
+            Start Sharing Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>

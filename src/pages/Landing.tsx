@@ -36,6 +36,7 @@ const faqs = [
 ];
 
 export default function Landing() {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
   return (

@@ -72,9 +72,9 @@ function AppSidebar() {
                       end={item.url === '/app'}
                       className={cn(
                         'hover:bg-sidebar-accent',
-                        item.title === 'Upload' && 'ring-1 ring-primary/30 bg-primary/5 font-medium text-primary'
+                        item.title === 'Upload' && !isItemActive(item.url) && 'ring-1 ring-primary/30 bg-primary/5 font-medium text-primary'
                       )}
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium !ring-0"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium !ring-0 !bg-sidebar-accent"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}

@@ -61,7 +61,15 @@ function AppSidebar() {
               {navItems.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/app'} className="hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                    <NavLink
+                      to={item.url}
+                      end={item.url === '/app'}
+                      className={cn(
+                        'hover:bg-sidebar-accent',
+                        item.title === 'Upload' && 'ring-1 ring-primary/30 bg-primary/5 font-medium text-primary'
+                      )}
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium !ring-0"
+                    >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>

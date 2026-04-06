@@ -40,20 +40,24 @@ function SwipeableRow({
     rowRef.current.style.transition = 'none';
   }, []);
 
+  const vibrate = useCallback((pattern: number | number[]) => {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+  }, []);
+
   const onTouchEnd = useCallback(() => {
     if (!rowRef.current) return;
     swiping.current = false;
     const threshold = -80;
     if (currentX.current < threshold) {
-      // Hold at reveal position and show confirm
       rowRef.current.style.transition = 'transform 200ms ease-out';
       rowRef.current.style.transform = 'translateX(-90px)';
       setConfirming(true);
+      vibrate(10);
     } else {
       resetPosition();
     }
     currentX.current = 0;
-  }, [resetPosition]);
+  }, [resetPosition, vibrate]);
 
   const handleConfirmDelete = useCallback(() => {
     if (!rowRef.current) return;

@@ -70,8 +70,9 @@ export default function Landing() {
             Share anything. Anywhere.<br />
             <span className="bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_200%]" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto font-serif">
-            Store, organize, and share files across any device with complete privacy.                     No tracking, no ads, no compromise.
+          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Store, organize, and share files across any device with complete privacy.
+            No tracking, no ads, no compromise.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button size="lg" onClick={() => navigate('/login')}>

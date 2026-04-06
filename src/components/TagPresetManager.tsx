@@ -1,10 +1,74 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useApp, TagPreset } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Layers, Plus, X, Trash2, Check, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+
+function SwipeableRow({
+  onDelete,
+  children,
+}: {
+  onDelete: () => void;
+  children: React.ReactNode;
+}) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const startX = useRef(0);
+  const currentX = useRef(0);
+  const swiping = useRef(false);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    currentX.current = 0;
+    swiping.current = true;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!swiping.current || !rowRef.current) return;
+    const diff = e.touches[0].clientX - startX.current;
+    // Only allow left swipe
+    currentX.current = Math.min(0, diff);
+    rowRef.current.style.transform = `translateX(${currentX.current}px)`;
+    rowRef.current.style.transition = 'none';
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!rowRef.current) return;
+    swiping.current = false;
+    const threshold = -80;
+    if (currentX.current < threshold) {
+      // Animate off-screen then delete
+      rowRef.current.style.transition = 'transform 200ms ease-out, opacity 200ms ease-out';
+      rowRef.current.style.transform = 'translateX(-100%)';
+      rowRef.current.style.opacity = '0';
+      setTimeout(onDelete, 200);
+    } else {
+      // Snap back
+      rowRef.current.style.transition = 'transform 200ms ease-out';
+      rowRef.current.style.transform = 'translateX(0)';
+    }
+    currentX.current = 0;
+  }, [onDelete]);
+
+  return (
+    <div className="relative overflow-hidden rounded-lg">
+      {/* Delete background */}
+      <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-4 rounded-lg">
+        <Trash2 className="h-4 w-4 text-destructive-foreground" />
+      </div>
+      <div
+        ref={rowRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className="relative"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   fileIds: string[];
@@ -135,42 +199,46 @@ export default function TagPresetManager({ fileIds, onApplied }: Props) {
                 saveLabel="Update"
               />
             ) : (
-              <div
+              <SwipeableRow
                 key={preset.id}
-                className="group flex items-start gap-2 p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                onDelete={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{preset.name}</p>
-                  <div className="flex flex-wrap gap-0.5 mt-1">
-                    {preset.tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-[9px] px-1.5 py-0">
-                        {tag}
-                      </Badge>
-                    ))}
+                <div
+                  className="group flex items-start gap-2 p-2 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">{preset.name}</p>
+                    <div className="flex flex-wrap gap-0.5 mt-1">
+                      {preset.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-[9px] px-1.5 py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" className="h-6 text-[10px] px-2" onClick={() => handleApply(preset)}>
+                      Apply
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                      onClick={() => { setEditingId(preset.id); setCreating(false); }}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1 shrink-0">
-                  <Button size="sm" className="h-6 text-[10px] px-2" onClick={() => handleApply(preset)}>
-                    Apply
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
-                    onClick={() => { setEditingId(preset.id); setCreating(false); }}
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                    onClick={() => { deleteTagPreset(preset.id); toast.success(`Deleted "${preset.name}"`); }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
+              </SwipeableRow>
             )
           )}
         </div>

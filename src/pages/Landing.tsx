@@ -65,7 +65,7 @@ export default function Landing() {
       {/* Hero */}
       <section className="py-20 md:py-32 px-4">
         <div className="container mx-auto text-center max-w-3xl animate-fade-in">
-          <Badge variant="secondary" className="mb-4">Now in public demo</Badge>
+          
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
             Share anything. Anywhere.<br />
             <span className="bg-clip-text text-transparent" style={{backgroundImage: 'var(--gradient-hero)'}}>Privately.</span>

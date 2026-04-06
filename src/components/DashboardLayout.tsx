@@ -46,6 +46,12 @@ function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { user, setAuthenticated } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isItemActive = (url: string) => {
+    if (url === '/app') return location.pathname === '/app';
+    return location.pathname.startsWith(url);
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border hidden md:flex">

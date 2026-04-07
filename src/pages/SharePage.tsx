@@ -1,23 +1,89 @@
 import { useParams } from "react-router-dom";
-import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, FileWarning, Lock, Image, Video } from "lucide-react";
+import { Download, FileWarning, Lock, Image, Video, Loader2 } from "lucide-react";
 import { formatBytes, formatDate } from "@/data/mockData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ShareLinkRow {
+  id: string;
+  slug: string;
+  access: string;
+  password_hash: string | null;
+  active: boolean;
+  expires_at: string | null;
+  media_id: string;
+}
+
+interface MediaFileRow {
+  id: string;
+  title: string;
+  file_type: string;
+  size: number;
+  preview_url: string | null;
+  video_url: string | null;
+  created_at: string;
+}
 
 export default function SharePage() {
   const { id } = useParams<{ id: string }>();
-  const { shareLinks, media } = useApp();
+  const [loading, setLoading] = useState(true);
+  const [link, setLink] = useState<ShareLinkRow | null>(null);
+  const [file, setFile] = useState<MediaFileRow | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordUnlocked, setPasswordUnlocked] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
-  const link = shareLinks.find((s) => s.slug === id);
+  useEffect(() => {
+    async function fetchShareData() {
+      if (!id) { setNotFound(true); setLoading(false); return; }
 
-  if (!link) {
+      const { data: linkData, error: linkError } = await supabase
+        .from("share_links")
+        .select("*")
+        .eq("slug", id)
+        .maybeSingle();
+
+      if (linkError || !linkData) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
+      setLink(linkData as ShareLinkRow);
+
+      if (!linkData.active) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: mediaData } = await supabase
+        .from("media_files")
+        .select("*")
+        .eq("id", linkData.media_id)
+        .maybeSingle();
+
+      setFile(mediaData as MediaFileRow | null);
+      setLoading(false);
+    }
+
+    fetchShareData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (notFound || !link) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
@@ -62,7 +128,8 @@ export default function SharePage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (passwordInput === link.password) {
+                // For now, compare plain text. In production, use server-side hash comparison.
+                if (passwordInput === link.password_hash) {
                   setPasswordUnlocked(true);
                   setPasswordError(false);
                 } else {
@@ -94,8 +161,6 @@ export default function SharePage() {
     );
   }
 
-  const file = media.find((m) => m.id === link.mediaId);
-
   if (!file) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -113,7 +178,8 @@ export default function SharePage() {
   }
 
   const handleDownload = () => {
-    const url = file.type === "video" && file.videoUrl ? file.videoUrl : file.previewUrl;
+    const url = file.file_type === "video" && file.video_url ? file.video_url : file.preview_url;
+    if (!url) return;
     const a = document.createElement("a");
     a.href = url;
     a.download = file.title;
@@ -130,26 +196,28 @@ export default function SharePage() {
         <CardContent className="py-8 space-y-6">
           {/* File preview */}
           <div className="rounded-lg overflow-hidden bg-muted flex items-center justify-center max-h-[60vh]">
-            {file.type === "video" && file.videoUrl ? (
+            {file.file_type === "video" && file.video_url ? (
               <video
-                src={file.videoUrl}
+                src={file.video_url}
                 controls
                 className="w-full max-h-[60vh] object-contain"
-                poster={file.previewUrl}
+                poster={file.preview_url || undefined}
               />
-            ) : (
+            ) : file.preview_url ? (
               <img
-                src={file.previewUrl}
+                src={file.preview_url}
                 alt={file.title}
                 className="w-full max-h-[60vh] object-contain"
               />
+            ) : (
+              <div className="py-12 text-muted-foreground text-sm">No preview available</div>
             )}
           </div>
 
           {/* File info */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              {file.type === "image" ? (
+              {file.file_type === "image" ? (
                 <Image className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <Video className="h-4 w-4 text-muted-foreground" />
@@ -160,9 +228,9 @@ export default function SharePage() {
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span>{formatBytes(file.size)}</span>
               <span>·</span>
-              <span>{formatDate(file.uploadedAt)}</span>
+              <span>{formatDate(file.created_at)}</span>
               <Badge variant="secondary" className="text-xs capitalize">
-                {file.type}
+                {file.file_type}
               </Badge>
             </div>
           </div>

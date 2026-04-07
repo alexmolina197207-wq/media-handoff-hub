@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { generateShareId } from '@/lib/utils';
+import { uploadFileToStorage } from '@/lib/supabaseHelpers';
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -228,78 +229,91 @@ export default function UploadPage() {
     setQueue((prev) => prev.map((q) => (q.id === fileId ? { ...q, tags: q.tags.filter((t) => t !== tag) } : q)));
   };
 
-  // --- Simulate upload ---
+  // --- Upload file to Supabase Storage ---
   const uploadFile = useCallback(
     (id: string) => {
       setQueue((prev) =>
         prev.map((q) => (q.id === id ? { ...q, status: "uploading", progress: 0, error: undefined } : q)),
       );
 
-      let progress = 0;
       let cancelled = false;
-      const interval = setInterval(
-        () => {
-          if (cancelled) {
-            clearInterval(interval);
+      const queuedFile = queue.find((q) => q.id === id);
+      if (!queuedFile) return;
+
+      // Simulate progress while uploading
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        if (cancelled) { clearInterval(progressInterval); return; }
+        progress = Math.min(progress + Math.random() * 10 + 2, 90);
+        setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, progress } : q)));
+      }, 300);
+
+      const doUpload = async () => {
+        try {
+          const publicUrl = await uploadFileToStorage(queuedFile.file);
+          
+          if (cancelled) return;
+          clearInterval(progressInterval);
+
+          if (!publicUrl) {
+            setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "error", error: "Upload failed - are you logged in?" } : q)));
+            abortRefs.current.delete(id);
             return;
           }
-          progress += Math.random() * 15 + 5;
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            let completedFile: QueuedFile | null = null;
-            setQueue((prev) =>
-              prev.map((q) => {
-                if (q.id !== id) return q;
-                completedFile = q;
-                return { ...q, status: "complete", progress: 100 };
-              }),
-            );
 
-            if (completedFile) {
-              const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-              const slug = generateShareId();
-              addMedia({
-                id: mediaId,
-                title: completedFile.name,
-                type: completedFile.mediaType,
-                tags: normalizeTags(completedFile.tags),
-                size: completedFile.size,
-                folderId: completedFile.folderId,
-                collectionId: completedFile.collectionId,
-                previewUrl:
-                  completedFile.previewUrl ||
-                  `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`,
-                notes: "",
-                uploadedAt: new Date().toISOString(),
-                source: "Upload",
-              });
-              addShareLink({
-                id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-                mediaId,
-                slug,
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                access: 'public',
-                clicks: 0,
-                active: true,
-              });
-            }
+          setQueue((prev) =>
+            prev.map((q) => (q.id === id ? { ...q, status: "complete", progress: 100 } : q)),
+          );
 
-            abortRefs.current.delete(id);
-          } else {
-            setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, progress: Math.min(progress, 99) } : q)));
-          }
-        },
-        200 + Math.random() * 300,
-      );
+          const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          const slug = generateShareId();
+          const isVideo = queuedFile.mediaType === "video";
+
+          addMedia({
+            id: mediaId,
+            title: queuedFile.name,
+            type: queuedFile.mediaType,
+            tags: normalizeTags(queuedFile.tags),
+            size: queuedFile.size,
+            folderId: queuedFile.folderId,
+            collectionId: queuedFile.collectionId,
+            previewUrl: isVideo
+              ? (queuedFile.previewUrl || `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`)
+              : publicUrl,
+            videoUrl: isVideo ? publicUrl : undefined,
+            notes: "",
+            uploadedAt: new Date().toISOString(),
+            source: "Upload",
+          });
+
+          addShareLink({
+            id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            mediaId,
+            slug,
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            access: 'public',
+            clicks: 0,
+            active: true,
+          });
+
+          abortRefs.current.delete(id);
+        } catch (err) {
+          if (cancelled) return;
+          clearInterval(progressInterval);
+          setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "error", error: "Upload failed" } : q)));
+          abortRefs.current.delete(id);
+        }
+      };
+
+      doUpload();
 
       abortRefs.current.set(id, () => {
         cancelled = true;
-        clearInterval(interval);
+        clearInterval(progressInterval);
         setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "cancelled", progress: 0 } : q)));
       });
     },
-    [addMedia],
+    [addMedia, addShareLink, queue],
   );
 
   // --- Auto-start queued files ---

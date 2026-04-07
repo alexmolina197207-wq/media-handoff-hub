@@ -418,6 +418,19 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+      {/* First-time user guidance — disappears after first upload */}
+      {!hasUploaded && queue.length === 0 && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 md:p-6 text-center animate-fade-in">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
+            <Upload className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-1">Upload your first file</h1>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            Drop a file below to instantly generate a secure share link — no signup required.
+          </p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Upload Media</h1>

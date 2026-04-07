@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +24,8 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -361,6 +363,25 @@ export default function UploadPage() {
   const totalCount = queue.length;
   const hasActive = queue.some((q) => q.status === "uploading" || q.status === "queued");
   const pendingFiles = queue.filter((q) => q.status === "queued" || q.status === "duplicate");
+  const allDone = totalCount > 0 && completedCount === totalCount && !hasActive;
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Generate a shareable link for the most recent upload batch
+  const generatedShareLink = useMemo(() => {
+    if (!allDone) return "";
+    return `https://anyrelay.app/share-${Date.now().toString(36)}`;
+  }, [allDone]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedShareLink);
+      setLinkCopied(true);
+      toast.success("Copied! Send it to anyone");
+      setTimeout(() => setLinkCopied(false), 3000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
 
   // Helper to add a bulk tag
   const addBulkTag = (tag: string) => {
@@ -644,6 +665,41 @@ export default function UploadPage() {
           />
         ))}
       </div>
+
+      {/* Post-upload success state */}
+      {allDone && (
+        <Card className="border-primary/30 bg-primary/5 animate-fade-in">
+          <CardContent className="py-8 text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-foreground">Upload complete</h2>
+              <p className="text-sm text-muted-foreground">Your file is ready to share</p>
+            </div>
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={handleCopyLink}
+            >
+              {linkCopied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy Link
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground">Send this link to anyone to give access</p>
+          </CardContent>
+        </Card>
+      )}
 
     </div>
   );

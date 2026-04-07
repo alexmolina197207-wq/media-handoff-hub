@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatBytes, formatDate } from '@/data/mockData';
-import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp, ChevronRight, ArrowRight } from 'lucide-react';
+import { Upload, Link2, FolderOpen, Layers, HardDrive, TrendingUp, ChevronRight, ArrowRight, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -21,20 +21,29 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Onboarding banner — hidden after first upload */}
+      {/* Prominent onboarding card for first-time users */}
       {!hasUploaded && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 md:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">Welcome to AnyRelay</h1>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              Start by uploading your first file to generate a secure share link — no account needed.
-            </p>
+        <div
+          onClick={() => navigate('/app/upload')}
+          className="group relative cursor-pointer rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 p-6 md:p-8 transition-all duration-200 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 hover:border-primary/50 active:scale-[0.99]"
+        >
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          <div className="relative flex flex-col sm:flex-row items-center gap-5">
+            <div className="flex-shrink-0 h-16 w-16 rounded-2xl bg-primary/15 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Sparkles className="h-8 w-8 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <h1 className="text-xl md:text-2xl font-bold text-foreground mb-1">Get started in seconds</h1>
+              <p className="text-muted-foreground text-sm md:text-base">
+                Upload your first file to generate a secure share link instantly
+              </p>
+            </div>
+            <Button size="lg" className="gradient-hero shrink-0 gap-2 shadow-md group-hover:shadow-lg transition-shadow" style={{ color: 'white' }}>
+              <Upload className="h-4 w-4" />
+              Upload File
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
           </div>
-          <Button size="lg" className="gradient-hero shrink-0 gap-2" style={{ color: 'white' }} onClick={() => navigate('/app/upload')}>
-            <Upload className="h-4 w-4" />
-            Upload File
-            <ArrowRight className="h-4 w-4" />
-          </Button>
         </div>
       )}
 
@@ -58,9 +67,13 @@ export default function Dashboard() {
           <CardHeader><CardTitle className="text-base">Recent Uploads</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {media.length === 0 ? (
-              <div className="text-center py-8">
+              <div
+                className="text-center py-8 cursor-pointer rounded-lg hover:bg-muted/50 transition-colors"
+                onClick={() => navigate('/app/upload')}
+              >
                 <Upload className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
                 <p className="text-sm text-muted-foreground">No files yet — upload your first file to get started</p>
+                <p className="text-xs text-primary mt-1">Click to upload →</p>
               </div>
             ) : (
               media.slice(0, 5).map(m => (

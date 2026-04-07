@@ -87,6 +87,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 5b. Path-injection guard: anonymous media must use the anonymous/ prefix
+    if (media.user_id === null) {
+      if (media.preview_path && !media.preview_path.startsWith("anonymous/")) {
+        return new Response(
+          JSON.stringify({ error: "Invalid media path" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (media.video_path && !media.video_path.startsWith("anonymous/")) {
+        return new Response(
+          JSON.stringify({ error: "Invalid media path" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const SIGNED_URL_EXPIRY = 300; // 5 minutes
 
     const result: { preview_url?: string; video_url?: string } = {};

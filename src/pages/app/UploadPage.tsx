@@ -514,12 +514,17 @@ export default function UploadPage() {
               </div>
               <div className="space-y-1">
                 <h2 className="text-xl font-bold text-foreground">Upload complete</h2>
-                <p className="text-sm text-muted-foreground">Share this link with anyone</p>
+                <p className="text-sm text-muted-foreground">Your private share link is ready</p>
               </div>
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-4">
+                {generatedShareLink && (
+                  <div className={`px-4 py-2.5 rounded-lg border transition-all duration-300 ${linkCopied ? 'border-primary/50 bg-primary/10 shadow-md shadow-primary/10' : 'border-border bg-muted/60'}`}>
+                    <p className="text-sm font-mono text-foreground/90 tracking-tight select-all">{generatedShareLink}</p>
+                  </div>
+                )}
                 <Button
                   size="lg"
-                  className="gap-2 gradient-hero shadow-md text-lg px-8 py-6"
+                  className={`gap-2 shadow-lg text-lg px-10 py-6 transition-all duration-200 ${linkCopied ? 'bg-primary/90 shadow-primary/20' : 'gradient-hero shadow-md hover:shadow-lg'}`}
                   style={{ color: 'white' }}
                   onClick={handleCopyLink}
                 >
@@ -535,15 +540,13 @@ export default function UploadPage() {
                     </>
                   )}
                 </Button>
-                {generatedShareLink && (
-                  <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-3 py-1.5 rounded-md">{generatedShareLink}</p>
-                )}
+                <p className="text-xs text-muted-foreground">Share this link with anyone</p>
               </div>
               <div className="flex items-center justify-center gap-3 pt-2">
-                <Button variant="outline" size="sm" onClick={() => { setQueue([]); setLinkCopied(false); }}>
+                <Button variant="outline" size="sm" className="text-muted-foreground" onClick={() => { setQueue([]); setLinkCopied(false); }}>
                   Upload Another
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/app/library")}>
+                <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate("/app/library")}>
                   View Library
                 </Button>
               </div>

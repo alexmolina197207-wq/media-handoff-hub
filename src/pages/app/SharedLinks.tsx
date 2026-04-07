@@ -28,7 +28,7 @@ export default function SharedLinks() {
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
 
   const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`https://anyrelay.app/s/${slug}`);
+    navigator.clipboard.writeText(`https://anyrelay.net/s/${slug}`);
     toast.success('Link copied to clipboard!');
   };
 
@@ -78,7 +78,7 @@ export default function SharedLinks() {
                   {file && <img src={file.previewUrl} alt={file.title} className="w-14 h-14 rounded-md object-cover shrink-0" />}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{file?.title || 'Unknown file'}</p>
-                    <p className="text-xs text-muted-foreground font-mono mt-0.5">anyrelay.app/s/{s.slug}</p>
+                    <p className="text-xs text-muted-foreground font-mono mt-0.5">anyrelay.net/s/{s.slug}</p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <Badge variant={status.variant} className="text-[10px]">
                         {status.label}
@@ -164,7 +164,7 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
         <img src={file.previewUrl} alt={file.title} className="w-12 h-12 rounded-md object-cover" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground truncate">{file.title}</p>
-          <p className="text-xs text-muted-foreground font-mono">anyrelay.app/s/{link.slug}</p>
+          <p className="text-xs text-muted-foreground font-mono">anyrelay.net/s/{link.slug}</p>
         </div>
         <Badge variant={status.variant} className="text-xs shrink-0">{status.label}</Badge>
       </div>

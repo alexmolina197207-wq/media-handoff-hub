@@ -187,7 +187,7 @@ function MobileDrawerNav() {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { user: authUser, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -197,9 +197,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!authUser) {
-    return <Navigate to="/login" replace />;
-  }
+  // Allow both authenticated and guest users to access the dashboard
 
   return (
     <SidebarProvider>

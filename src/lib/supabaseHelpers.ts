@@ -3,14 +3,13 @@ import type { MediaFile, ShareLink } from "@/data/mockData";
 
 /**
  * Persist a media file record to Supabase.
- * Requires the user to be authenticated.
+ * Works for both authenticated and anonymous users.
  */
 export async function persistMedia(m: MediaFile): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
 
   const { data, error } = await supabase.from("media_files").insert({
-    user_id: user.id,
+    user_id: user?.id ?? null,
     title: m.title,
     file_type: m.type,
     size: m.size,
@@ -30,13 +29,13 @@ export async function persistMedia(m: MediaFile): Promise<string | null> {
 
 /**
  * Persist a share link record to Supabase.
+ * Works for both authenticated and anonymous users.
  */
 export async function persistShareLink(s: ShareLink, dbMediaId: string): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
 
   const { error } = await supabase.from("share_links").insert({
-    user_id: user.id,
+    user_id: user?.id ?? null,
     media_id: dbMediaId,
     slug: s.slug,
     access: s.access,
@@ -54,13 +53,14 @@ export async function persistShareLink(s: ShareLink, dbMediaId: string): Promise
 
 /**
  * Upload a file to Supabase Storage and return the public URL.
+ * Works for both authenticated and anonymous users.
  */
 export async function uploadFileToStorage(file: File): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
 
+  const folder = user?.id ?? 'anonymous';
   const ext = file.name.split('.').pop() || 'bin';
-  const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
   const { error } = await supabase.storage.from("media").upload(path, file);
   if (error) {

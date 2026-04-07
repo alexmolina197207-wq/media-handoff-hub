@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { generateShareId } from '@/lib/utils';
 import { uploadFileToStorage } from '@/lib/supabaseHelpers';
 import { useApp } from "@/context/AppContext";
-import { useNavigate as useNav } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
 import { formatBytes } from "@/data/mockData";
 
 // --- Config ---

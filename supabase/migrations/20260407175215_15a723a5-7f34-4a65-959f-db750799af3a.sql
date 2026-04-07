@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anonymous users can view their own media" ON public.media_files;

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { RefreshCw } from 'lucide-react';
 import { useApp } from '@/context/AppContext';

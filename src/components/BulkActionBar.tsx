@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import TagPresetManager from '@/components/TagPresetManager';
 import { Button } from '@/components/ui/button';

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

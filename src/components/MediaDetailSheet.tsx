@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { MediaFile, formatBytes, formatDate } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';

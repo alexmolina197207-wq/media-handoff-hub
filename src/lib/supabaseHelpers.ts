@@ -8,7 +8,12 @@ import type { MediaFile, ShareLink } from "@/data/mockData";
 export async function persistMedia(m: MediaFile): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase.from("media_files").insert({
+  // Generate UUID client-side so we don't need .select() after insert
+  // (anon SELECT policies may not allow reading back the row immediately)
+  const dbId = crypto.randomUUID();
+
+  const { error } = await supabase.from("media_files").insert({
+    id: dbId,
     user_id: user?.id ?? null,
     title: m.title,
     file_type: m.type,
@@ -18,13 +23,13 @@ export async function persistMedia(m: MediaFile): Promise<string | null> {
     tags: m.tags,
     folder_id: m.folderId,
     collection_id: m.collectionId,
-  }).select("id").single();
+  });
 
   if (error) {
     console.error("Failed to persist media:", error);
     return null;
   }
-  return data.id;
+  return dbId;
 }
 
 /**

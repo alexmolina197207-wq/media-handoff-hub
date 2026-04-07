@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { generateShareId } from '@/lib/utils';
 import { uploadFileToStorage } from '@/lib/supabaseHelpers';
 import { useApp } from "@/context/AppContext";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
 import { formatBytes } from "@/data/mockData";
 
 // --- Config ---
@@ -80,8 +80,23 @@ function fileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
+const ANON_UPLOAD_LIMIT = 2;
+
+function getAnonUploadCount(): number {
+  try { return Number(localStorage.getItem("uploadCount") || 0); } catch { return 0; }
+}
+
+function incrementAnonUploadCount() {
+  try {
+    const count = getAnonUploadCount() + 1;
+    localStorage.setItem("uploadCount", count.toString());
+  } catch {}
+}
+
 export default function UploadPage() {
-  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets, hasUploaded } = useApp();
+  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets, hasUploaded, isAuthenticated } = useApp();
+  const [anonUploadCount, setAnonUploadCount] = useState(getAnonUploadCount);
+  const isUploadBlocked = !isAuthenticated && anonUploadCount >= ANON_UPLOAD_LIMIT;
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -265,6 +280,12 @@ export default function UploadPage() {
             prev.map((q) => (q.id === id ? { ...q, status: "complete", progress: 100 } : q)),
           );
 
+          // Track anonymous upload count
+          if (!isAuthenticated) {
+            incrementAnonUploadCount();
+            setAnonUploadCount(getAnonUploadCount());
+          }
+
           const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
           const slug = generateShareId();
           const isVideo = queuedFile.mediaType === "video";
@@ -376,10 +397,19 @@ export default function UploadPage() {
     e.preventDefault();
     setIsDragging(false);
     dragCounter.current = 0;
+    if (isUploadBlocked) {
+      toast.error("Upload limit reached — create a free account to continue");
+      return;
+    }
     if (e.dataTransfer.files.length) enqueueFiles(e.dataTransfer.files);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isUploadBlocked) {
+      toast.error("Upload limit reached — create a free account to continue");
+      e.target.value = "";
+      return;
+    }
     if (e.target.files?.length) enqueueFiles(e.target.files);
     e.target.value = "";
   };
@@ -428,6 +458,27 @@ export default function UploadPage() {
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
             Drop a file below to instantly generate a secure share link — no signup required.
           </p>
+        </div>
+      )}
+
+      {/* Upload limit gate for anonymous users */}
+      {isUploadBlocked && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-fade-in space-y-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-destructive/10 mb-1">
+            <Ban className="h-6 w-6 text-destructive" />
+          </div>
+          <h2 className="text-lg font-bold text-foreground">Free upload limit reached</h2>
+          <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+            Create a free account to keep sharing files — unlimited uploads, password-protected links, and more.
+          </p>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <Button onClick={() => navigate("/login")} size="sm">
+              Sign Up
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/login")}>
+              Log In
+            </Button>
+          </div>
         </div>
       )}
 

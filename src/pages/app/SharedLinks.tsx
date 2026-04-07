@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -138,6 +139,8 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
   onCopy: () => void;
   onUpdate: (updates: Partial<ShareLink>) => void;
 }) {
+  const { isAuthenticated } = useApp();
+  const navigate = useNavigate();
   const [password, setPassword] = useState(link.password || '');
   const status = (() => {
     const expired = new Date(link.expiresAt) < new Date();
@@ -193,7 +196,14 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
         <p className="text-sm font-medium text-foreground">Access level</p>
         <Select
           value={link.access}
-          onValueChange={(v: 'public' | 'private' | 'password') => onUpdate({ access: v })}
+          onValueChange={(v: 'public' | 'private' | 'password') => {
+            if (v === 'password' && !isAuthenticated) {
+              toast.info('Create a free account to use password-protected links');
+              navigate('/login');
+              return;
+            }
+            onUpdate({ access: v });
+          }}
         >
           <SelectTrigger className="h-9">
             <SelectValue />

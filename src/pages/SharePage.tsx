@@ -13,6 +13,7 @@ export default function SharePage() {
   const { shareLinks, media } = useApp();
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordUnlocked, setPasswordUnlocked] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   const link = shareLinks.find((s) => s.slug === id);
 
@@ -55,7 +56,7 @@ export default function SharePage() {
           <CardContent className="py-8 space-y-4">
             <div className="text-center space-y-2">
               <Lock className="h-10 w-10 mx-auto text-muted-foreground" />
-              <h1 className="text-lg font-semibold text-foreground">Password required</h1>
+              <h1 className="text-lg font-semibold text-foreground">This file is password protected</h1>
               <p className="text-sm text-muted-foreground">Enter the password to access this file.</p>
             </div>
             <form
@@ -63,18 +64,26 @@ export default function SharePage() {
                 e.preventDefault();
                 if (passwordInput === link.password) {
                   setPasswordUnlocked(true);
+                  setPasswordError(false);
                 } else {
                   setPasswordInput("");
+                  setPasswordError(true);
                 }
               }}
               className="space-y-3"
             >
-              <Input
-                type="password"
-                placeholder="Password"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-              />
+              <div className="space-y-1.5">
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={passwordInput}
+                  onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
+                  className={passwordError ? "border-destructive" : ""}
+                />
+                {passwordError && (
+                  <p className="text-xs text-destructive">Incorrect password. Please try again.</p>
+                )}
+              </div>
               <Button type="submit" className="w-full">
                 Unlock
               </Button>

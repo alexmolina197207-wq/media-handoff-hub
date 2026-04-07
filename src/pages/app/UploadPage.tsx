@@ -421,6 +421,7 @@ export default function UploadPage() {
   const pendingFiles = queue.filter((q) => q.status === "queued" || q.status === "duplicate");
   const allDone = totalCount > 0 && completedCount === totalCount && !hasActive;
   const [linkCopied, setLinkCopied] = useState(false);
+  const successRef = useRef<HTMLDivElement>(null);
 
   // Get the share link for the most recently uploaded file
   const generatedShareLink = useMemo(() => {

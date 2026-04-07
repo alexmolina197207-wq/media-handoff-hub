@@ -257,7 +257,7 @@ export default function UploadPage() {
 
             if (completedFile) {
               const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-              const slug = `${completedFile.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}-${Date.now().toString(36)}`;
+              const slug = generateShareId();
               addMedia({
                 id: mediaId,
                 title: completedFile.name,

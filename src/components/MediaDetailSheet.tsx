@@ -210,7 +210,7 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
   };
 
   const createShareLink = () => {
-    const slug = `share-${Date.now().toString(36)}`;
+    const slug = generateShareId();
     addShareLink({
       id: `s-${Date.now()}`,
       mediaId: selected.id,

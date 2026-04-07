@@ -80,7 +80,7 @@ export default function Folders() {
   };
 
   const createShareLink = (mediaId: string) => {
-    const slug = `share-${Date.now().toString(36)}`;
+    const slug = generateShareId();
     addShareLink({
       id: `s-${Date.now()}`,
       mediaId,

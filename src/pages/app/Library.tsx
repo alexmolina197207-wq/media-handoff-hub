@@ -197,7 +197,7 @@ export default function Library() {
 
   const createShareLink = (mediaId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const slug = `share-${Date.now().toString(36)}`;
+    const slug = generateShareId();
     addShareLink({
       id: `s-${Date.now()}`, mediaId, slug,
       expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),

@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import Landing from "./pages/Landing";
@@ -20,6 +21,7 @@ import Analytics from "./pages/app/Analytics";
 import AppSettings from "./pages/app/AppSettings";
 import NotFound from "./pages/NotFound";
 import SharePage from "./pages/SharePage";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,7 @@ const App = () => (
     <TooltipProvider>
       <ThemeProvider>
       <NotificationProvider>
+      <AuthProvider>
       <AppProvider>
         <Toaster />
         <Sonner />
@@ -44,11 +47,13 @@ const App = () => (
             <Route path="/app/storage" element={<DashboardLayout><Storage /></DashboardLayout>} />
             <Route path="/app/analytics" element={<DashboardLayout><Analytics /></DashboardLayout>} />
             <Route path="/app/settings" element={<DashboardLayout><AppSettings /></DashboardLayout>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/s/:id" element={<SharePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </AppProvider>
+      </AuthProvider>
       </NotificationProvider>
       </ThemeProvider>
     </TooltipProvider>

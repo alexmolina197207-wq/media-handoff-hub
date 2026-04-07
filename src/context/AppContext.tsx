@@ -177,7 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const upgradeUser = () => {
-    setUser(prev => ({ ...prev, plan: 'pro' }));
+    setPlan('pro');
     setStorage(prev => ({ ...prev, limit: 5_000_000_000 }));
   };
 

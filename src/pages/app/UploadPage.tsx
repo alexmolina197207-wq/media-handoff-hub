@@ -271,7 +271,7 @@ export default function UploadPage() {
           clearInterval(progressInterval);
 
           if (!publicUrl) {
-            setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "error", error: "Upload failed - are you logged in?" } : q)));
+            setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "error", error: "Upload failed — please try again" } : q)));
             abortRefs.current.delete(id);
             return;
           }

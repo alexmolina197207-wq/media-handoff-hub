@@ -26,7 +26,7 @@ export type Database = {
           tags: string[] | null
           title: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           video_url: string | null
         }
         Insert: {
@@ -40,7 +40,7 @@ export type Database = {
           tags?: string[] | null
           title: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           video_url?: string | null
         }
         Update: {
@@ -54,7 +54,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           video_url?: string | null
         }
         Relationships: []
@@ -69,7 +69,7 @@ export type Database = {
           media_id: string
           password_hash: string | null
           slug: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           access?: string
@@ -80,7 +80,7 @@ export type Database = {
           media_id: string
           password_hash?: string | null
           slug: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           access?: string
@@ -91,7 +91,7 @@ export type Database = {
           media_id?: string
           password_hash?: string | null
           slug?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

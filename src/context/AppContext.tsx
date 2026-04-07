@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   MediaFile, Folder, Collection, ShareLink, StorageSummary, ActivitySummary, User,
-  demoUser,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';

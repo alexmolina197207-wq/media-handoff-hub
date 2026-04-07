@@ -169,6 +169,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       title: 'Share link created',
       message: `A new share link was created for "${file?.title || 'a file'}"${s.expiresAt ? ` expiring ${new Date(s.expiresAt).toLocaleDateString()}` : ''}.`,
     });
+    // Persist to database - wait for media DB id to be available
+    const tryPersist = (attempts = 0) => {
+      const dbMediaId = mediaDbIdMap.get(s.mediaId);
+      if (dbMediaId) {
+        persistShareLink(s, dbMediaId);
+      } else if (attempts < 20) {
+        setTimeout(() => tryPersist(attempts + 1), 300);
+      }
+    };
+    tryPersist();
   };
 
   const updateShareLink = (id: string, updates: Partial<ShareLink>) => {
@@ -238,6 +248,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
       tagPresets, addTagPreset, deleteTagPreset, updateTagPreset,
       hasUploaded,
+      mediaDbIdMap,
       activity: { uploadsThisWeek: 0, sharesThisWeek: 0, topTags: [], collectionsActive: 0 },
     }}>
       {children}

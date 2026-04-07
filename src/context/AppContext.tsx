@@ -46,6 +46,7 @@ interface AppState {
   deleteTagPreset: (id: string) => void;
   updateTagPreset: (id: string, updates: Partial<TagPreset>) => void;
   hasUploaded: boolean;
+  mediaDbIdMap: Map<string, string>; // local id -> db id
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -101,6 +102,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try { return localStorage.getItem('dr_has_uploaded') === 'true'; } catch { return false; }
   });
 
+  const [mediaDbIdMap] = useState(() => new Map<string, string>());
+
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);
     setStorage(prev => ({ ...prev, fileCount: prev.fileCount + 1, used: prev.used + m.size, recentUploads: prev.recentUploads + 1 }));
@@ -112,6 +115,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       type: 'upload',
       title: 'Upload complete',
       message: `"${m.title}" (${(m.size / 1_000_000).toFixed(1)} MB) was uploaded successfully.`,
+    });
+    // Persist to database
+    persistMedia(m).then(dbId => {
+      if (dbId) mediaDbIdMap.set(m.id, dbId);
     });
   };
 

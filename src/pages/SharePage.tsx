@@ -13,8 +13,6 @@ interface ResolvedMedia {
   title: string;
   file_type: string;
   size: number;
-  preview_url: string | null;
-  video_url: string | null;
   created_at: string;
 }
 
@@ -36,6 +34,11 @@ export default function SharePage() {
   const [passwordError, setPasswordError] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
+  // Signed URLs fetched from the edge function
+  const [signedPreviewUrl, setSignedPreviewUrl] = useState<string | null>(null);
+  const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
+  const [urlsLoading, setUrlsLoading] = useState(false);
+
   useEffect(() => {
     async function fetchShareData() {
       if (!slug) {
@@ -56,6 +59,30 @@ export default function SharePage() {
 
     fetchShareData();
   }, [slug]);
+
+  // Fetch signed URLs for non-password-protected links once metadata is resolved
+  useEffect(() => {
+    if (!linkData?.found || !linkData.active || linkData.is_password_protected || !linkData.media) return;
+    fetchSignedUrls();
+  }, [linkData]);
+
+  async function fetchSignedUrls(password?: string) {
+    if (!slug) return;
+    setUrlsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-signed-media-url", {
+        body: { slug, password },
+      });
+      if (!error && data) {
+        setSignedPreviewUrl(data.preview_url || null);
+        setSignedVideoUrl(data.video_url || null);
+      }
+    } catch (err) {
+      console.error("Failed to fetch signed URLs:", err);
+    } finally {
+      setUrlsLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -88,15 +115,17 @@ export default function SharePage() {
                 e.preventDefault();
                 if (!slug || verifying) return;
                 setVerifying(true);
-                const { data, error } = await supabase.rpc("verify_share_password", {
-                  _slug: slug,
-                  _password: passwordInput,
+                // Verify password AND get signed URLs in one call
+                const { data, error } = await supabase.functions.invoke("get-signed-media-url", {
+                  body: { slug, password: passwordInput },
                 });
                 setVerifying(false);
-                if (error || !data) {
+                if (error || !data || data.error) {
                   setPasswordInput("");
                   setPasswordError(true);
                 } else {
+                  setSignedPreviewUrl(data.preview_url || null);
+                  setSignedVideoUrl(data.video_url || null);
                   setPasswordUnlocked(true);
                   setPasswordError(false);
                 }
@@ -130,17 +159,32 @@ export default function SharePage() {
     return <StatusCard icon={FileWarning} title="File not found" message="The file associated with this link could not be found." />;
   }
 
-  const handleDownload = () => {
-    const url = file.file_type === "video" && file.video_url ? file.video_url : file.preview_url;
+  if (urlsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const handleDownload = async () => {
+    const url = file.file_type === "video" && signedVideoUrl ? signedVideoUrl : signedPreviewUrl;
     if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.title;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = file.title;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in new tab
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
   };
 
   return (
@@ -148,10 +192,10 @@ export default function SharePage() {
       <Card className="max-w-2xl w-full">
         <CardContent className="py-8 space-y-6">
           <div className="rounded-lg overflow-hidden bg-muted flex items-center justify-center max-h-[60vh]">
-            {file.file_type === "video" && file.video_url ? (
-              <video src={file.video_url} controls className="w-full max-h-[60vh] object-contain" poster={file.preview_url || undefined} />
-            ) : file.preview_url ? (
-              <img src={file.preview_url} alt={file.title} className="w-full max-h-[60vh] object-contain" />
+            {file.file_type === "video" && signedVideoUrl ? (
+              <video src={signedVideoUrl} controls className="w-full max-h-[60vh] object-contain" poster={signedPreviewUrl || undefined} />
+            ) : signedPreviewUrl ? (
+              <img src={signedPreviewUrl} alt={file.title} className="w-full max-h-[60vh] object-contain" />
             ) : (
               <div className="py-12 text-muted-foreground text-sm">No preview available</div>
             )}

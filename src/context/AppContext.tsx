@@ -132,8 +132,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
 
         if (dbMedia && dbMedia.length > 0) {
-          const mapped: MediaFile[] = dbMedia.map(row => {
+          // Generate signed URLs for authenticated user's files
+          const mapped: MediaFile[] = await Promise.all(dbMedia.map(async (row) => {
             mediaDbIdMap.set(row.id, row.id);
+
+            let previewUrl = '';
+            let videoUrl: string | undefined;
+
+            // Generate signed URLs from storage paths
+            const previewPath = (row as any).preview_path;
+            const videoPath = (row as any).video_path;
+
+            if (previewPath) {
+              const { data } = await supabase.storage.from('media').createSignedUrl(previewPath, 3600);
+              if (data) previewUrl = data.signedUrl;
+            }
+            if (videoPath) {
+              const { data } = await supabase.storage.from('media').createSignedUrl(videoPath, 3600);
+              if (data) videoUrl = data.signedUrl;
+            }
+
             return {
               id: row.id,
               title: row.title,
@@ -142,13 +160,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
               size: Number(row.size),
               folderId: row.folder_id,
               collectionId: row.collection_id,
-              previewUrl: row.preview_url || '',
-              videoUrl: row.video_url || undefined,
+              previewUrl,
+              videoUrl,
               notes: '',
               uploadedAt: row.created_at,
               source: 'upload',
             };
-          });
+          }));
           setMedia(mapped);
           const totalSize = mapped.reduce((s, m) => s + m.size, 0);
           setStorage(prev => ({

@@ -265,16 +265,18 @@ export default function UploadPage() {
 
       const doUpload = async () => {
         try {
-          const publicUrl = await uploadFileToStorage(queuedFile.file);
+          const uploadResult = await uploadFileToStorage(queuedFile.file);
           
           if (cancelled) return;
           clearInterval(progressInterval);
 
-          if (!publicUrl) {
+          if (!uploadResult) {
             setQueue((prev) => prev.map((q) => (q.id === id ? { ...q, status: "error", error: "Upload failed — please try again" } : q)));
             abortRefs.current.delete(id);
             return;
           }
+
+          const { publicUrl, storagePath } = uploadResult;
 
           setQueue((prev) =>
             prev.map((q) => (q.id === id ? { ...q, status: "complete", progress: 100 } : q)),

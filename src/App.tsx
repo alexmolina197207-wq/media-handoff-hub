@@ -19,6 +19,7 @@ import Storage from "./pages/app/Storage";
 import Analytics from "./pages/app/Analytics";
 import AppSettings from "./pages/app/AppSettings";
 import NotFound from "./pages/NotFound";
+import SharePage from "./pages/SharePage";
 
 const queryClient = new QueryClient();
 

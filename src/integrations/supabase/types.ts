@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      media_files: {
+        Row: {
+          collection_id: string | null
+          created_at: string
+          file_type: string
+          folder_id: string | null
+          id: string
+          preview_url: string | null
+          size: number
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          collection_id?: string | null
+          created_at?: string
+          file_type?: string
+          folder_id?: string | null
+          id?: string
+          preview_url?: string | null
+          size?: number
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          collection_id?: string | null
+          created_at?: string
+          file_type?: string
+          folder_id?: string | null
+          id?: string
+          preview_url?: string | null
+          size?: number
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      share_links: {
+        Row: {
+          access: string
+          active: boolean
+          created_at: string
+          expires_at: string | null
+          id: string
+          media_id: string
+          password_hash: string | null
+          slug: string
+          user_id: string
+        }
+        Insert: {
+          access?: string
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          media_id: string
+          password_hash?: string | null
+          slug: string
+          user_id: string
+        }
+        Update: {
+          access?: string
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          media_id?: string
+          password_hash?: string | null
+          slug?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -49,7 +49,7 @@ export default function SharePage() {
       if (error || !data) {
         setLinkData({ found: false });
       } else {
-        setLinkData(data as ResolvedLink);
+        setLinkData(data as unknown as ResolvedLink);
       }
       setLoading(false);
     }

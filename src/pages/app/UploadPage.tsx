@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { generateShareId } from '@/lib/utils';
 import { uploadFileToStorage } from '@/lib/supabaseHelpers';
 import { useApp } from "@/context/AppContext";
+import { useNavigate as useNav } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -80,8 +81,23 @@ function fileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
+const ANON_UPLOAD_LIMIT = 2;
+
+function getAnonUploadCount(): number {
+  try { return Number(localStorage.getItem("uploadCount") || 0); } catch { return 0; }
+}
+
+function incrementAnonUploadCount() {
+  try {
+    const count = getAnonUploadCount() + 1;
+    localStorage.setItem("uploadCount", count.toString());
+  } catch {}
+}
+
 export default function UploadPage() {
-  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets, hasUploaded } = useApp();
+  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets, hasUploaded, isAuthenticated } = useApp();
+  const [anonUploadCount, setAnonUploadCount] = useState(getAnonUploadCount);
+  const isUploadBlocked = !isAuthenticated && anonUploadCount >= ANON_UPLOAD_LIMIT;
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);

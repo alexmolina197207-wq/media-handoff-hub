@@ -19,6 +19,7 @@ import Storage from "./pages/app/Storage";
 import Analytics from "./pages/app/Analytics";
 import AppSettings from "./pages/app/AppSettings";
 import NotFound from "./pages/NotFound";
+import SharePage from "./pages/SharePage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/app/storage" element={<DashboardLayout><Storage /></DashboardLayout>} />
             <Route path="/app/analytics" element={<DashboardLayout><Analytics /></DashboardLayout>} />
             <Route path="/app/settings" element={<DashboardLayout><AppSettings /></DashboardLayout>} />
+            <Route path="/s/:id" element={<SharePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -47,7 +47,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+      <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 ${!hasUploaded ? 'opacity-60' : ''}`}>
         {stats.map(s => (
           <Link key={s.label} to={s.route} className="block">
             <Card className="shadow-card border-border transition-all duration-100 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm h-full">
@@ -73,7 +73,10 @@ export default function Dashboard() {
               >
                 <Upload className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
                 <p className="text-sm text-muted-foreground">No files yet — upload your first file to get started</p>
-                <p className="text-xs text-primary mt-1">Click to upload →</p>
+                <Button size="sm" className="mt-3 gradient-hero gap-1.5" style={{ color: 'white' }}>
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload your first file
+                </Button>
               </div>
             ) : (
               media.slice(0, 5).map(m => (

@@ -462,6 +462,27 @@ export default function UploadPage() {
         </div>
       )}
 
+      {/* Upload limit gate for anonymous users */}
+      {isUploadBlocked && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center animate-fade-in space-y-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-destructive/10 mb-1">
+            <Ban className="h-6 w-6 text-destructive" />
+          </div>
+          <h2 className="text-lg font-bold text-foreground">Free upload limit reached</h2>
+          <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+            Create a free account to keep sharing files — unlimited uploads, password-protected links, and more.
+          </p>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <Button onClick={() => navigate("/login")} size="sm">
+              Sign Up
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/login")}>
+              Log In
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Upload Media</h1>

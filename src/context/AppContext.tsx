@@ -101,6 +101,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const [mediaDbIdMap] = useState(() => new Map<string, string>());
+  const [hydrated, setHydrated] = useState(false);
+
+  // Hydrate state from database when authenticated user session is ready
+  useEffect(() => {
+    if (!authUser) {
+      setHydrated(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function hydrate() {
+      try {
+        const { data: dbMedia, error: mediaErr } = await supabase
+          .from('media_files')
+          .select('*')
+          .eq('user_id', authUser!.id)
+          .order('created_at', { ascending: false });
+
+        if (mediaErr) console.error('Failed to hydrate media:', mediaErr);
+
+        const { data: dbLinks, error: linksErr } = await supabase
+          .from('share_links')
+          .select('*')
+          .eq('user_id', authUser!.id);
+
+        if (linksErr) console.error('Failed to hydrate share links:', linksErr);
+
+        if (cancelled) return;
+
+        if (dbMedia && dbMedia.length > 0) {
+          const mapped: MediaFile[] = dbMedia.map(row => {
+            mediaDbIdMap.set(row.id, row.id);
+            return {
+              id: row.id,
+              title: row.title,
+              type: (row.file_type === 'video' ? 'video' : 'image') as 'image' | 'video',
+              tags: row.tags || [],
+              size: Number(row.size),
+              folderId: row.folder_id,
+              collectionId: row.collection_id,
+              previewUrl: row.preview_url || '',
+              videoUrl: row.video_url || undefined,
+              notes: '',
+              uploadedAt: row.created_at,
+              source: 'upload',
+            };
+          });
+          setMedia(mapped);
+          const totalSize = mapped.reduce((s, m) => s + m.size, 0);
+          setStorage(prev => ({
+            ...prev,
+            fileCount: mapped.length,
+            used: totalSize,
+          }));
+        }
+
+        if (dbLinks && dbLinks.length > 0) {
+          const mapped: ShareLink[] = dbLinks.map(row => ({
+            id: row.id,
+            mediaId: row.media_id,
+            slug: row.slug,
+            expiresAt: row.expires_at || '',
+            access: row.access as 'public' | 'private' | 'password',
+            clicks: 0,
+            active: row.active,
+            password: row.password_hash || undefined,
+          }));
+          setShareLinks(mapped);
+        }
+      } catch (err) {
+        console.error('Hydration error:', err);
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    }
+
+    hydrate();
+    return () => { cancelled = true; };
+  }, [authUser?.id]);
 
   const addMedia = (m: MediaFile) => {
     setMedia(prev => [m, ...prev]);

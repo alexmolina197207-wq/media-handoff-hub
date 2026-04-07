@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     // 5. Look up the media file for storage paths
     const { data: media, error: mediaErr } = await supabaseAdmin
       .from("media_files")
-      .select("id, preview_path, video_path")
+      .select("id, user_id, preview_path, video_path")
       .eq("id", link.media_id)
       .single();
 
@@ -85,6 +85,22 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Media file not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // 5b. Path-injection guard: anonymous media must use the anonymous/ prefix
+    if (media.user_id === null) {
+      if (media.preview_path && !media.preview_path.startsWith("anonymous/")) {
+        return new Response(
+          JSON.stringify({ error: "Invalid media path" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (media.video_path && !media.video_path.startsWith("anonymous/")) {
+        return new Response(
+          JSON.stringify({ error: "Invalid media path" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const SIGNED_URL_EXPIRY = 300; // 5 minutes

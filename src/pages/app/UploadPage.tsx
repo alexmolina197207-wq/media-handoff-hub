@@ -281,6 +281,12 @@ export default function UploadPage() {
             prev.map((q) => (q.id === id ? { ...q, status: "complete", progress: 100 } : q)),
           );
 
+          // Track anonymous upload count
+          if (!isAuthenticated) {
+            incrementAnonUploadCount();
+            setAnonUploadCount(getAnonUploadCount());
+          }
+
           const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
           const slug = generateShareId();
           const isVideo = queuedFile.mediaType === "video";
@@ -392,10 +398,19 @@ export default function UploadPage() {
     e.preventDefault();
     setIsDragging(false);
     dragCounter.current = 0;
+    if (isUploadBlocked) {
+      toast.error("Upload limit reached — create a free account to continue");
+      return;
+    }
     if (e.dataTransfer.files.length) enqueueFiles(e.dataTransfer.files);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isUploadBlocked) {
+      toast.error("Upload limit reached — create a free account to continue");
+      e.target.value = "";
+      return;
+    }
     if (e.target.files?.length) enqueueFiles(e.target.files);
     e.target.value = "";
   };

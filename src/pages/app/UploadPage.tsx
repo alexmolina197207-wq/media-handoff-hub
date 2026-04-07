@@ -421,6 +421,7 @@ export default function UploadPage() {
   const pendingFiles = queue.filter((q) => q.status === "queued" || q.status === "duplicate");
   const allDone = totalCount > 0 && completedCount === totalCount && !hasActive;
   const [linkCopied, setLinkCopied] = useState(false);
+  const successRef = useRef<HTMLDivElement>(null);
 
   // Get the share link for the most recently uploaded file
   const generatedShareLink = useMemo(() => {
@@ -439,6 +440,13 @@ export default function UploadPage() {
       toast.error("Failed to copy link");
     }
   };
+
+  // Auto-scroll to success state when upload completes
+  useEffect(() => {
+    if (allDone && successRef.current) {
+      successRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [allDone]);
 
   // Helper to add a bulk tag
   const addBulkTag = (tag: string) => {
@@ -494,41 +502,90 @@ export default function UploadPage() {
         )}
       </div>
 
-      {/* Drop zone */}
-      <Card
-        className={`border-2 border-dashed cursor-pointer transition-all duration-300 ease-out ${
-          isDragging
-            ? "border-primary bg-primary/10 scale-[1.02] shadow-xl shadow-primary/10 ring-2 ring-primary/20"
-            : "border-border hover:border-primary/50 hover:bg-muted/30"
-        }`}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <CardContent className="py-12 text-center">
-          <div className={`transition-transform duration-300 ease-out ${isDragging ? "-translate-y-2" : ""}`}>
-            <Upload
-              className={`h-10 w-10 mx-auto mb-3 transition-all duration-300 ${
-                isDragging ? "text-primary scale-125" : "text-muted-foreground"
-              }`}
-            />
-            <p className="text-foreground font-medium mb-1">
-              {isDragging ? "Drop files here" : "Drag & drop files here"}
-            </p>
-            <p className={`text-sm mb-3 transition-colors duration-200 ${isDragging ? "text-primary/70" : "text-muted-foreground"}`}>
-              {isDragging ? "Release to add files" : "or click to browse"}
-            </p>
-          </div>
-          <div className={`flex items-center justify-center gap-2 text-xs text-muted-foreground transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>
-            <Image className="h-3.5 w-3.5" /> JPEG, PNG, WebP, GIF
-            <span className="mx-1.5 text-border">|</span>
-            <Video className="h-3.5 w-3.5" /> MP4, MOV, WebM
-          </div>
-          <p className={`text-xs text-muted-foreground mt-2 transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>Max {formatBytes(MAX_FILE_SIZE)} per file</p>
-        </CardContent>
-      </Card>
+      {/* Success state replaces drop zone when all done */}
+      {allDone ? (
+        <div ref={successRef}>
+          <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 shadow-lg shadow-primary/10 animate-fade-in">
+            <CardContent className="py-10 text-center space-y-5">
+              <div className="flex justify-center">
+                <div className="h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center">
+                  <CheckCircle2 className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-foreground">Upload complete</h2>
+                <p className="text-sm text-muted-foreground">Share this link with anyone</p>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  size="lg"
+                  className="gap-2 gradient-hero shadow-md text-lg px-8 py-6"
+                  style={{ color: 'white' }}
+                  onClick={handleCopyLink}
+                >
+                  {linkCopied ? (
+                    <>
+                      <Check className="h-5 w-5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-5 w-5" />
+                      Copy Link
+                    </>
+                  )}
+                </Button>
+                {generatedShareLink && (
+                  <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-3 py-1.5 rounded-md">{generatedShareLink}</p>
+                )}
+              </div>
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <Button variant="outline" size="sm" onClick={() => { setQueue([]); setLinkCopied(false); }}>
+                  Upload Another
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/app/library")}>
+                  View Library
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <Card
+          className={`border-2 border-dashed cursor-pointer transition-all duration-300 ease-out ${
+            isDragging
+              ? "border-primary bg-primary/10 scale-[1.02] shadow-xl shadow-primary/10 ring-2 ring-primary/20"
+              : "border-border hover:border-primary/50 hover:bg-muted/30"
+          }`}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <CardContent className="py-12 text-center">
+            <div className={`transition-transform duration-300 ease-out ${isDragging ? "-translate-y-2" : ""}`}>
+              <Upload
+                className={`h-10 w-10 mx-auto mb-3 transition-all duration-300 ${
+                  isDragging ? "text-primary scale-125" : "text-muted-foreground"
+                }`}
+              />
+              <p className="text-foreground font-medium mb-1">
+                {isDragging ? "Drop files here" : "Drag & drop files here"}
+              </p>
+              <p className={`text-sm mb-3 transition-colors duration-200 ${isDragging ? "text-primary/70" : "text-muted-foreground"}`}>
+                {isDragging ? "Release to add files" : "or click to browse"}
+              </p>
+            </div>
+            <div className={`flex items-center justify-center gap-2 text-xs text-muted-foreground transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>
+              <Image className="h-3.5 w-3.5" /> JPEG, PNG, WebP, GIF
+              <span className="mx-1.5 text-border">|</span>
+              <Video className="h-3.5 w-3.5" /> MP4, MOV, WebM
+            </div>
+            <p className={`text-xs text-muted-foreground mt-2 transition-opacity duration-200 ${isDragging ? "opacity-0" : "opacity-100"}`}>Max {formatBytes(MAX_FILE_SIZE)} per file</p>
+          </CardContent>
+        </Card>
+      )}
 
       <input
         ref={inputRef}
@@ -756,41 +813,6 @@ export default function UploadPage() {
           />
         ))}
       </div>
-
-      {/* Post-upload success state */}
-      {allDone && (
-        <Card className="border-primary/30 bg-primary/5 animate-fade-in">
-          <CardContent className="py-8 text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <CheckCircle2 className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-foreground">Upload complete</h2>
-              <p className="text-sm text-muted-foreground">Your file is ready to share</p>
-            </div>
-            <Button
-              size="lg"
-              className="gap-2"
-              onClick={handleCopyLink}
-            >
-              {linkCopied ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  Copy Link
-                </>
-              )}
-            </Button>
-            <p className="text-xs text-muted-foreground">Send this link to anyone to give access</p>
-          </CardContent>
-        </Card>
-      )}
 
     </div>
   );

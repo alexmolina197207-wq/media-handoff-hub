@@ -22,7 +22,7 @@ export default function HeroSection() {
           No tracking, no ads, no compromise.
         </p>
         <div className="flex items-center justify-center gap-4">
-          <Button size="lg" onClick={() => navigate('/app/upload')}>
+          <Button size="lg" onClick={() => navigate('/app')}>
             Start Sharing Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <Button

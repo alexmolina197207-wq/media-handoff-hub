@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import {
   MediaFile, Folder, Collection, ShareLink, StorageSummary, ActivitySummary, User,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { persistMedia, persistShareLink } from '@/lib/supabaseHelpers';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface TagPreset {
   id: string;

@@ -701,7 +701,7 @@ export default function UploadPage() {
         </Card>
       )}
 
-
+    </div>
   );
 }
 

@@ -4,6 +4,7 @@ import {
   demoUser,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
+import { useAuth } from '@/context/AuthContext';
 import { persistMedia, persistShareLink } from '@/lib/supabaseHelpers';
 
 export interface TagPreset {
@@ -21,7 +22,6 @@ interface AppState {
   storage: StorageSummary;
   activity: ActivitySummary;
   isAuthenticated: boolean;
-  setAuthenticated: (v: boolean) => void;
   addMedia: (m: MediaFile) => void;
   updateMedia: (id: string, updates: Partial<MediaFile>) => void;
   addShareLink: (s: ShareLink) => void;
@@ -53,17 +53,8 @@ const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { addNotification } = useNotifications();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const setAuthenticated = (v: boolean) => {
-    setIsAuthenticated(v);
-    if (v) {
-      addNotification({
-        type: 'security',
-        title: 'New sign-in detected',
-        message: 'You signed in from this device just now.',
-      });
-    }
-  };
+  const { user: authUser } = useAuth();
+  const isAuthenticated = !!authUser;
   const [user, setUser] = useState<User>(demoUser);
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -243,7 +234,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       user, media, folders, collections,
       shareLinks, storage,
-      isAuthenticated, setAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
+      isAuthenticated, addMedia, updateMedia, deleteMedia, bulkDeleteMedia, bulkMoveToFolder, bulkAddTags, bulkRemoveTags, addShareLink, updateShareLink, upgradeUser,
       addFolder, reorderFolders, reorderMedia, addCollection, deleteFolder, deleteCollection,
       twoFactorEnabled, twoFactorMethod, setTwoFactor,
       tagPresets, addTagPreset, deleteTagPreset, updateTagPreset,

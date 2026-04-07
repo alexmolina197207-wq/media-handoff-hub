@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -33,7 +33,7 @@ function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { user } = useApp();
-  const { signOut } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -88,9 +88,15 @@ function AppSidebar() {
                 <p className="text-xs text-sidebar-foreground/50 truncate">{user.plan} plan</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={async () => { await signOut(); navigate('/'); }}>
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </Button>
+            {authUser ? (
+              <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={async () => { await signOut(); navigate('/'); }}>
+                <LogOut className="mr-2 h-4 w-4" /> Sign out
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => navigate('/login')}>
+                <LogOut className="mr-2 h-4 w-4" /> Sign in
+              </Button>
+            )}
           </div>
         )}
       </SidebarContent>
@@ -112,7 +118,7 @@ function MobileDrawerNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useApp();
-  const { signOut } = useAuth();
+  const { user: authUser, signOut } = useAuth();
 
   const isActive = (url: string) => {
     if (url === '/app') return location.pathname === '/app';
@@ -171,14 +177,25 @@ function MobileDrawerNav() {
                 <p className="text-xs text-muted-foreground truncate">{user.plan} plan</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-muted-foreground hover:text-foreground"
-              onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
-            >
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </Button>
+            {authUser ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-muted-foreground hover:text-foreground"
+                onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Sign out
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-muted-foreground hover:text-foreground"
+                onClick={() => { navigate('/login'); setOpen(false); }}
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Sign in
+              </Button>
+            )}
           </div>
         </SheetContent>
       </Sheet>
@@ -187,7 +204,7 @@ function MobileDrawerNav() {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { user: authUser, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -197,9 +214,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!authUser) {
-    return <Navigate to="/login" replace />;
-  }
+  // Allow both authenticated and guest users to access the dashboard
 
   return (
     <SidebarProvider>

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   MediaFile, Folder, Collection, ShareLink, StorageSummary, ActivitySummary, User,
-  demoUser,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
@@ -55,7 +54,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { addNotification } = useNotifications();
   const { user: authUser } = useAuth();
   const isAuthenticated = !!authUser;
-  const [user, setUser] = useState<User>(demoUser);
+
+  // Derive display user from real auth — no more fake "Alex Rivera"
+  const [plan, setPlan] = useState<'free' | 'pro' | 'team'>('free');
+  const user: User = {
+    name: authUser?.user_metadata?.full_name || authUser?.email?.split('@')[0] || 'Guest',
+    email: authUser?.email || '',
+    plan,
+  };
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -177,7 +183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const upgradeUser = () => {
-    setUser(prev => ({ ...prev, plan: 'pro' }));
+    setPlan('pro');
     setStorage(prev => ({ ...prev, limit: 5_000_000_000 }));
   };
 

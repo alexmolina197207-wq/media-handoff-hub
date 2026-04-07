@@ -1,38 +1,55 @@
 
-## Implementation Plan (in order)
 
-### 1. Library Sorting Options
-- Add a sort dropdown (Newest, Oldest, Name A-Z, Name Z-A, Size ↑, Size ↓)
-- Replace or enhance the existing "Date" sort button
-- Mobile-friendly trigger
+# Plan: Implement Real Authentication
 
-### 2. Inline Media Editing
-- Add rename, tag editing, and notes editing to the MediaDetailSheet
-- Editable fields with save/cancel inline UX
-- Wire updates through AppContext
+## What needs to happen
 
-### 3. Share Link Controls
-- Add expiry date picker (1 day, 7 days, 30 days, custom, never)
-- Public/private toggle and optional password field
-- Show link status badge (active/expired/password-protected)
-- Update SharedLinks page and detail views
+Replace the fake local-state auth with real backend authentication so users can sign up, log in, stay logged in across refreshes, and have uploads attached to their account.
 
-### 4. Analytics Detail Views
-- Make shared links and files tappable in Analytics
-- Show mock engagement detail: views over time, unique visitors, referrers, device breakdown
-- Keep it demo/mock data driven
+## Changes
 
-### 5. Notification Polish
-- Clean up notification copy for clarity
-- Add distinct icons/colors per notification type (upload, share, system)
-- Improve empty state with illustration and message
+### 1. Auth context (new file: `src/context/AuthContext.tsx`)
+- Create a dedicated auth context using `supabase.auth.onAuthStateChange` and `supabase.auth.getSession`
+- Expose: `user`, `session`, `loading`, `signUp`, `signIn`, `signOut`
+- Wrap the app with this provider
 
-### 6. Bulk Actions Polish
-- Clearer multi-select mode indicator
-- Sticky/improved action bar on mobile
-- Confirmation dialogs for delete and other destructive actions
+### 2. Login page (`src/pages/Login.tsx`)
+- Replace fake `handleSubmit` with real `supabase.auth.signUp` / `supabase.auth.signInWithPassword`
+- Show proper error messages (invalid credentials, email taken, etc.)
+- Replace fake forgot-password with `supabase.auth.resetPasswordForEmail`
+- Remove dependency on `AppContext.setAuthenticated`
 
-### 7. Final Cleanup Pass
-- Review spacing, responsive layouts, tap targets across all pages
-- Add loading skeletons where missing
-- Consistency check on typography, colors, empty states
+### 3. AppContext (`src/context/AppContext.tsx`)
+- Remove `isAuthenticated` / `setAuthenticated` local state
+- Read auth state from the new AuthContext instead
+- When user is authenticated, pass `user.id` as `user_id` when persisting media/share links
+
+### 4. Route protection (`src/components/DashboardLayout.tsx`)
+- If user is not authenticated, redirect to `/login`
+- Show loading state while session is being checked
+
+### 5. Upload persistence (`src/lib/supabaseHelpers.ts`)
+- Update `persistMedia` to accept and store `user_id` from the authenticated session
+- Update `persistShareLink` similarly
+
+### 6. App.tsx
+- Add `AuthProvider` wrapping the app
+- Add a `/reset-password` route for the password reset flow
+
+### 7. Password reset page (new: `src/pages/ResetPassword.tsx`)
+- Check for recovery token in URL
+- Let user set a new password via `supabase.auth.updateUser`
+
+### 8. Auth configuration
+- Use `cloud--configure_auth` to ensure email+password auth is enabled
+- Email confirmation will be required by default (no auto-confirm)
+
+## What stays the same
+- Anonymous upload flow (2 free uploads without account) — unchanged
+- All UI styling and layout — unchanged
+- Database schema — unchanged (tables already have nullable `user_id`)
+- Landing page, share pages — unchanged
+
+## Estimated scope
+~7 files changed/created. Core auth flow with sign up, sign in, sign out, session persistence, route protection, and password reset.
+

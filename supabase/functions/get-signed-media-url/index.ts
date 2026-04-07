@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
     // 5. Look up the media file for storage paths
     const { data: media, error: mediaErr } = await supabaseAdmin
       .from("media_files")
-      .select("id, preview_path, video_path")
+      .select("id, user_id, preview_path, video_path")
       .eq("id", link.media_id)
       .single();
 

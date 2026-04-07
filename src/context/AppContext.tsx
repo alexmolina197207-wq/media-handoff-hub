@@ -4,6 +4,7 @@ import {
   demoUser,
 } from '@/data/mockData';
 import { useNotifications } from '@/context/NotificationContext';
+import { persistMedia, persistShareLink } from '@/lib/supabaseHelpers';
 
 export interface TagPreset {
   id: string;

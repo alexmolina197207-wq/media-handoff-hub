@@ -118,7 +118,7 @@ function MobileDrawerNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useApp();
-  const { signOut } = useAuth();
+  const { user: authUser, signOut } = useAuth();
 
   const isActive = (url: string) => {
     if (url === '/app') return location.pathname === '/app';
@@ -177,14 +177,25 @@ function MobileDrawerNav() {
                 <p className="text-xs text-muted-foreground truncate">{user.plan} plan</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-muted-foreground hover:text-foreground"
-              onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
-            >
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </Button>
+            {authUser ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-muted-foreground hover:text-foreground"
+                onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Sign out
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-muted-foreground hover:text-foreground"
+                onClick={() => { navigate('/login'); setOpen(false); }}
+              >
+                <LogOut className="mr-2 h-4 w-4" /> Sign in
+              </Button>
+            )}
           </div>
         </SheetContent>
       </Sheet>

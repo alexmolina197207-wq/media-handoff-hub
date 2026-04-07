@@ -79,7 +79,7 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, folders, collections, addMedia, tagPresets } = useApp();
+  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -256,8 +256,10 @@ export default function UploadPage() {
             );
 
             if (completedFile) {
+              const mediaId = `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+              const slug = `${completedFile.name.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30)}-${Date.now().toString(36)}`;
               addMedia({
-                id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                id: mediaId,
                 title: completedFile.name,
                 type: completedFile.mediaType,
                 tags: normalizeTags(completedFile.tags),
@@ -270,6 +272,15 @@ export default function UploadPage() {
                 notes: "",
                 uploadedAt: new Date().toISOString(),
                 source: "Upload",
+              });
+              addShareLink({
+                id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                mediaId,
+                slug,
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                access: 'public',
+                clicks: 0,
+                active: true,
               });
             }
 
@@ -366,11 +377,12 @@ export default function UploadPage() {
   const allDone = totalCount > 0 && completedCount === totalCount && !hasActive;
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Generate a shareable link for the most recent upload batch
+  // Get the share link for the most recently uploaded file
   const generatedShareLink = useMemo(() => {
-    if (!allDone) return "";
-    return `https://anyrelay.net/share-${Date.now().toString(36)}`;
-  }, [allDone]);
+    if (!allDone || shareLinks.length === 0) return "";
+    const latestLink = shareLinks[0]; // shareLinks are prepended, so first is latest
+    return `https://anyrelay.net/s/${latestLink.slug}`;
+  }, [allDone, shareLinks]);
 
   const handleCopyLink = async () => {
     try {

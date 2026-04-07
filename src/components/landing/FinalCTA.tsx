@@ -23,7 +23,7 @@ export default function FinalCTA() {
         <p className="text-muted-foreground mb-10">
           No signup required. No credit card. Just private, secure file sharing.
         </p>
-        <Button size="lg" onClick={() => navigate('/app')}>
+        <Button size="lg" onClick={() => navigate('/app/upload')}>
           Start Sharing Free <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </div>

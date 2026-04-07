@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,14 +21,15 @@ import NotificationPreferences from '@/components/NotificationPreferences';
 import DataExport from '@/components/DataExport';
 
 export default function AppSettings() {
-  const { user, upgradeUser, setAuthenticated } = useApp();
+  const { user, upgradeUser } = useApp();
+  const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [deleteStep, setDeleteStep] = useState<'closed' | 'warning' | 'confirm'>('closed');
   const [confirmText, setConfirmText] = useState('');
 
   const handleDeleteAccount = () => {
-    setAuthenticated(false);
+    signOut();
     setDeleteStep('closed');
     toast.success('Account scheduled for deletion. You have 30 days to cancel.');
     navigate('/');

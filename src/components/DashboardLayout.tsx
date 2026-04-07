@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -31,7 +32,8 @@ const navItems = [
 function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { user, setAuthenticated } = useApp();
+  const { user } = useApp();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -86,7 +88,7 @@ function AppSidebar() {
                 <p className="text-xs text-sidebar-foreground/50 truncate">{user.plan} plan</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={() => { setAuthenticated(false); navigate('/'); }}>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground" onClick={async () => { await signOut(); navigate('/'); }}>
               <LogOut className="mr-2 h-4 w-4" /> Sign out
             </Button>
           </div>
@@ -109,7 +111,8 @@ function MobileDrawerNav() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setAuthenticated } = useApp();
+  const { user } = useApp();
+  const { signOut } = useAuth();
 
   const isActive = (url: string) => {
     if (url === '/app') return location.pathname === '/app';
@@ -172,7 +175,7 @@ function MobileDrawerNav() {
               variant="ghost"
               size="sm"
               className="w-full justify-start text-muted-foreground hover:text-foreground"
-              onClick={() => { setAuthenticated(false); navigate('/'); setOpen(false); }}
+              onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
             >
               <LogOut className="mr-2 h-4 w-4" /> Sign out
             </Button>
@@ -184,6 +187,20 @@ function MobileDrawerNav() {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const { user: authUser, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!authUser) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">

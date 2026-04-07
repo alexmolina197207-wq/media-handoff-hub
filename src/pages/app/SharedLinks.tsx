@@ -138,6 +138,8 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
   onCopy: () => void;
   onUpdate: (updates: Partial<ShareLink>) => void;
 }) {
+  const { isAuthenticated } = useApp();
+  const navigate = useNavigate();
   const [password, setPassword] = useState(link.password || '');
   const status = (() => {
     const expired = new Date(link.expiresAt) < new Date();

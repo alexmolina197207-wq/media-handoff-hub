@@ -441,6 +441,13 @@ export default function UploadPage() {
     }
   };
 
+  // Auto-scroll to success state when upload completes
+  useEffect(() => {
+    if (allDone && successRef.current) {
+      successRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [allDone]);
+
   // Helper to add a bulk tag
   const addBulkTag = (tag: string) => {
     const t = tag.trim().toLowerCase();

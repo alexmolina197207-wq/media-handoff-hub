@@ -108,7 +108,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      resolve_share_link: { Args: { _slug: string }; Returns: Json }
+      verify_share_password: {
+        Args: { _password: string; _slug: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

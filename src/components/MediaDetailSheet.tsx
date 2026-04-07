@@ -220,11 +220,11 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
       clicks: 0,
       active: true,
     });
-    toast.success('Share link created!', { description: `anyrelay.app/${slug}` });
+    toast.success('Share link created!', { description: `anyrelay.net/${slug}` });
   };
 
   const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`https://anyrelay.app/s/${slug}`);
+    navigator.clipboard.writeText(`https://anyrelay.net/s/${slug}`);
     toast.success('Link copied!');
   };
 
@@ -434,7 +434,7 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
                 {selectedLinks.map(s => (
                   <div key={s.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border text-sm">
                     <div className="min-w-0">
-                      <p className="font-mono text-xs text-foreground truncate">anyrelay.app/s/{s.slug}</p>
+                      <p className="font-mono text-xs text-foreground truncate">anyrelay.net/s/{s.slug}</p>
                       <p className="text-xs text-muted-foreground">{s.clicks} clicks · {s.active ? 'Active' : 'Inactive'}</p>
                     </div>
                     <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => copyLink(s.slug)}>

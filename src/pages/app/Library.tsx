@@ -203,7 +203,7 @@ export default function Library() {
       expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
       access: 'public', clicks: 0, active: true,
     });
-    toast.success('Share link created!', { description: `anyrelay.app/${slug}` });
+    toast.success('Share link created!', { description: `anyrelay.net/${slug}` });
   };
 
   const handleRefresh = useCallback(async () => {

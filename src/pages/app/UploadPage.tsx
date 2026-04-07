@@ -369,7 +369,7 @@ export default function UploadPage() {
   // Generate a shareable link for the most recent upload batch
   const generatedShareLink = useMemo(() => {
     if (!allDone) return "";
-    return `https://anyrelay.app/share-${Date.now().toString(36)}`;
+    return `https://anyrelay.net/share-${Date.now().toString(36)}`;
   }, [allDone]);
 
   const handleCopyLink = async () => {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { MediaFile, formatBytes, formatDate } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';
@@ -210,7 +211,7 @@ export default function MediaDetailSheet({ mediaId, onClose, onTagClick }: Props
   };
 
   const createShareLink = () => {
-    const slug = `share-${Date.now().toString(36)}`;
+    const slug = generateShareId();
     addShareLink({
       id: `s-${Date.now()}`,
       mediaId: selected.id,

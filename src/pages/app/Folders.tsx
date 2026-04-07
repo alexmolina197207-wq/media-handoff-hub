@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -80,7 +81,7 @@ export default function Folders() {
   };
 
   const createShareLink = (mediaId: string) => {
-    const slug = `share-${Date.now().toString(36)}`;
+    const slug = generateShareId();
     addShareLink({
       id: `s-${Date.now()}`,
       mediaId,

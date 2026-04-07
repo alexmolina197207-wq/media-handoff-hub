@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { generateShareId } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import TagPresetManager from '@/components/TagPresetManager';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,7 @@ export default function BulkActionBar({ selectedIds, onClear }: Props) {
 
   const handleShare = () => {
     ids.forEach(mediaId => {
-      const slug = `share-${Date.now().toString(36)}-${mediaId.slice(-4)}`;
+      const slug = generateShareId();
       addShareLink({
         id: `s-${Date.now()}-${mediaId.slice(-4)}`,
         mediaId,

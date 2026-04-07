@@ -361,6 +361,25 @@ export default function UploadPage() {
   const totalCount = queue.length;
   const hasActive = queue.some((q) => q.status === "uploading" || q.status === "queued");
   const pendingFiles = queue.filter((q) => q.status === "queued" || q.status === "duplicate");
+  const allDone = totalCount > 0 && completedCount === totalCount && !hasActive;
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Generate a shareable link for the most recent upload batch
+  const generatedShareLink = useMemo(() => {
+    if (!allDone) return "";
+    return `https://anyrelay.app/share-${Date.now().toString(36)}`;
+  }, [allDone]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedShareLink);
+      setLinkCopied(true);
+      toast.success("Copied! Send it to anyone");
+      setTimeout(() => setLinkCopied(false), 3000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
 
   // Helper to add a bulk tag
   const addBulkTag = (tag: string) => {

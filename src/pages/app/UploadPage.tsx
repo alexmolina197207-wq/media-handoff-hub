@@ -607,14 +607,16 @@ export default function UploadPage() {
         </Card>
       )}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPT_STRING}
-        multiple
-        className="hidden"
-        onChange={handleInputChange}
-      />
+      {!isUploadBlocked && (
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPT_STRING}
+          multiple
+          className="hidden"
+          onChange={handleInputChange}
+        />
+      )}
 
       {/* Folder & Collection picker */}
       {queue.length > 0 && (

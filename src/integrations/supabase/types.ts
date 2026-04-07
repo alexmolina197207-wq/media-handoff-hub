@@ -21,12 +21,14 @@ export type Database = {
           file_type: string
           folder_id: string | null
           id: string
+          preview_path: string | null
           preview_url: string | null
           size: number
           tags: string[] | null
           title: string
           updated_at: string
           user_id: string | null
+          video_path: string | null
           video_url: string | null
         }
         Insert: {
@@ -35,12 +37,14 @@ export type Database = {
           file_type?: string
           folder_id?: string | null
           id?: string
+          preview_path?: string | null
           preview_url?: string | null
           size?: number
           tags?: string[] | null
           title: string
           updated_at?: string
           user_id?: string | null
+          video_path?: string | null
           video_url?: string | null
         }
         Update: {
@@ -49,12 +53,14 @@ export type Database = {
           file_type?: string
           folder_id?: string | null
           id?: string
+          preview_path?: string | null
           preview_url?: string | null
           size?: number
           tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string | null
+          video_path?: string | null
           video_url?: string | null
         }
         Relationships: []

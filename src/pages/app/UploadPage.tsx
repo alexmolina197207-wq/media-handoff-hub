@@ -543,9 +543,15 @@ export default function UploadPage() {
                 <p className="text-xs text-muted-foreground">Share this link with anyone</p>
               </div>
               <div className="flex items-center justify-center gap-3 pt-2">
-                <Button variant="outline" size="sm" className="text-muted-foreground" onClick={() => { setQueue([]); setLinkCopied(false); }}>
-                  Upload Another
-                </Button>
+                {isUploadBlocked ? (
+                  <Button size="sm" onClick={() => navigate("/login")}>
+                    Create free account to upload more
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="text-muted-foreground" onClick={() => { setQueue([]); setLinkCopied(false); }}>
+                    Upload Another
+                  </Button>
+                )}
                 <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate("/app/library")}>
                   View Library
                 </Button>
@@ -553,6 +559,17 @@ export default function UploadPage() {
             </CardContent>
           </Card>
         </div>
+      ) : isUploadBlocked ? (
+        <Card className="border-2 border-dashed border-destructive/30 bg-destructive/5">
+          <CardContent className="py-12 text-center space-y-3">
+            <Ban className="h-10 w-10 mx-auto text-destructive/70" />
+            <h2 className="text-lg font-bold text-foreground">You've reached your free upload limit</h2>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">Create a free account to continue uploading — unlimited uploads, password-protected links, and more.</p>
+            <Button onClick={() => navigate("/login")} className="mt-2">
+              Create free account to upload more
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <Card
           className={`border-2 border-dashed cursor-pointer transition-all duration-300 ease-out ${

@@ -666,7 +666,42 @@ export default function UploadPage() {
         ))}
       </div>
 
-    </div>
+      {/* Post-upload success state */}
+      {allDone && (
+        <Card className="border-primary/30 bg-primary/5 animate-fade-in">
+          <CardContent className="py-8 text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-foreground">Upload complete</h2>
+              <p className="text-sm text-muted-foreground">Your file is ready to share</p>
+            </div>
+            <Button
+              size="lg"
+              className="gap-2"
+              onClick={handleCopyLink}
+            >
+              {linkCopied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy Link
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground">Send this link to anyone to give access</p>
+          </CardContent>
+        </Card>
+      )}
+
+
   );
 }
 

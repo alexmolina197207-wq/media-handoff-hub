@@ -81,7 +81,7 @@ function fileId(file: File) {
 }
 
 export default function UploadPage() {
-  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets } = useApp();
+  const { media, folders, collections, addMedia, addShareLink, shareLinks, tagPresets, hasUploaded } = useApp();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);

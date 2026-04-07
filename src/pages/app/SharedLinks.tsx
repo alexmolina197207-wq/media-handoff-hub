@@ -196,7 +196,14 @@ function ShareLinkDetail({ link, file, onCopy, onUpdate }: {
         <p className="text-sm font-medium text-foreground">Access level</p>
         <Select
           value={link.access}
-          onValueChange={(v: 'public' | 'private' | 'password') => onUpdate({ access: v })}
+          onValueChange={(v: 'public' | 'private' | 'password') => {
+            if (v === 'password' && !isAuthenticated) {
+              toast.info('Create a free account to use password-protected links');
+              navigate('/login');
+              return;
+            }
+            onUpdate({ access: v });
+          }}
         >
           <SelectTrigger className="h-9">
             <SelectValue />

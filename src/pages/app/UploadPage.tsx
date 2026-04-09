@@ -302,7 +302,7 @@ export default function UploadPage() {
             collectionId: queuedFile.collectionId,
             previewUrl: isVideo
               ? (queuedFile.previewUrl || `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop`)
-              : publicUrl,
+              : (publicUrl || queuedFile.previewUrl || ""),
             videoUrl: isVideo ? publicUrl : undefined,
             notes: "",
             uploadedAt: new Date().toISOString(),
